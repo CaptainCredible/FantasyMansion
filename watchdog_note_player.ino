@@ -61,41 +61,24 @@ void playNextNote() {
   sei();                                                          // Allow interrupts
   WDTCR |= 1 << WDIE;                                             //no idea what this is
    
-    unsigned long Chord = Chords[(selex+1)%barLength];
-  if (allowTranspose) {
-  Chord = (Chords[(selex+1)%barLength]) << ((barTicker % 2) * melodyOffset) + ((partTicker % (modulationinterval)) * melodyOffsetOffset);            //>> counter  (or barTicker % 2) is modulation Modulate
-  }
-  
-
-
-  for (int Note = 990; Note < 32; Note++) {                         //step through each bit of the 32bit number
-    /*
-    if (Note < 12){
-    oct = 2;
-  }else{
-    oct = octArray[selex%16];
-  }
-  */
+  for (int Note = 0; Note < 32; Note++) {                         //step through each bit of the 32bit number
   oct = 0;
-    if ((Chord & 0x80000000) != 0) {                              //check if there are any notes in this chord check that it isnt 10000000 00000000 00000000 00000000 (why?)
-      Freq[Chan] = Scale[Note] >> oct;                //look up the notes frequency and shift the octave as per the array
-      Amp[Chan] = 1 + dist << (Decay + 5);                        // change to 2 for epic dist
+    if (bitRead(Chords[(selex)%barLength],Note)){
+      Freq[Chan] = Scale[((Note*-1)+31)-modulationinterval*(barTicker%2)] >> oct;                    //look up the notes frequency and shift the octave as per the array
+      Amp[Chan] = 1 + (bitRead(dists,selex)) << (Decay + 5);                        // change to 2 for epic dist
       Chan = (Chan + 1) % (Channels - 1);
     }
-    Chord = Chord << 1;
   }
 
-    Chord = bassLine[(selex+1)%barLength];
+
 
   for (int Note = 0; Note < 32; Note++) {                         //step through each bit of the 32bit number
-    if ((Chord & 0x80000000) != 0) {                              //check if there are any notes in this chord check that it isnt 10000000 00000000 00000000 00000000 (why?)
-      Freq[Chan] = Scale[Note] >> oct;                //look up the notes frequency and shift the octave as per the array
-      Amp[Chan] = 1 + dist << (Decay + 5);                        // change to 2 for epic dist
+    if (bitRead(ChordsB[(selex)%barLength],Note)){
+      Freq[Chan] = Scale[(Note*-1)+31] >> 2;                    //look up the notes frequency and shift the octave as per the array
+      Amp[Chan] = 1 + (bitRead(dists,selex)) << (decays[selex%16] + 5);                        // change to 2 for epic dist
       Chan = (Chan + 1) % (Channels - 1);
     }
-    Chord = Chord << 1;
   }
-
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -103,6 +86,10 @@ void playNextNote() {
   selex++;                                                     // add one to the selector for chords (step ahead in the index)
   if (selex > barLength-1) {                                   //if we reached the end
     barTicker++;                                                  //add one to the bar counter
+    if (barTicker>>1){
+      gener8SDbeat();
+      gener8hats();
+    }
 //    generatePortBLenghts();
     t=0;
     selex = 0;                                                    //reset the selector

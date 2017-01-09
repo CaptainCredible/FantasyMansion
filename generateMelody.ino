@@ -1,8 +1,8 @@
 void melodyTEST() {
   for (int i = 0; i < barLength; i++) {        //step through steps
-  Chords[i] = 0;                      //erase steps
+  //Chords[i] = 0;                      //erase steps
     if(true){
-    writeANote(i,i%barLength );              //by ofsetting by eight we are making a buffer of eight on either side of the melody for transposition
+    //writeANote(i,i%barLength );              //by ofsetting by eight we are making a buffer of eight on either side of the melody for transposition
     //writeANote(i,currentScale[(i*-1)+10] + 8);              //by ofsetting by eight we are making a buffer of eight on either side of the melody for transposition
     }
   }

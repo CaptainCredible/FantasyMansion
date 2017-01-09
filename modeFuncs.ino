@@ -184,14 +184,14 @@ void chordtest() {
     ownBeat = false;
    // clearMelody();
     play = true;
-    //gener8BDbeat();
-    //gener8SDbeat();
-    //gener8hats();
+    gener8BDbeat();
+    gener8SDbeat();
+    gener8hats();
     
     //generateChords();
    // melodyTEST();
     BDseq = 0b1000100010001000;
-    SDseq = 0b0000100000001111;
+    //SDseq = 0b0000100000001111;
     firstRun = false;
   }
 

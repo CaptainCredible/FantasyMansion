@@ -10,7 +10,7 @@ if(rightSwitch){
  
  playNoteNow(freqToBePlayed, octaveselect, 1);
  
- //int Note = currentScale[nert];
+
  
  }
  

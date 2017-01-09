@@ -1,11 +1,12 @@
 // Watchdog interrupt plays notes
 ISR(WDT_vect) {                                                  //interupt triggered by watchdog timer
-if (play){
-playNextNote();
+if (play){                                                       //if we "flag play"
+playNextNote();                                                  //play the next stored note
 }
-if(slolo){
-chordSolo(x);
-}
+
+//if(slolo){                                                      //if its a slolo    SLOLO ISNT USED
+//chordSolo(x);                                                   //slolo bitch
+//}
 
 if(Blink){
   blinkTicker = !blinkTicker;
@@ -34,70 +35,68 @@ void playNextNote(){
 
 
 if(beatWrite){
-   byte beatSeqSelexLookahead = (beatSeqSelex-1)%16;
-//  if(beatSeqSelexLookahead<0){   //replaced by modulo 
-//    beatSeqSelexLookahead = 15;
-//  }
+   byte beatSeqSelexLookahead = (beatSeqSelex-1)%16;     //make a lookahead number
   
-  if(x<300){ //BD
-    digitalWrite(LED,HIGH);
-    bitSet(BDseq,beatSeqSelexLookahead);
+  if(x<300){                                             //BD because it is pullup this is actually darkness
+    //digitalWrite(LED,HIGH);                              //why ?
+    bitSet(BDseq,beatSeqSelexLookahead);                 //set next step to BD
   } else if(x<400){ //SD
-    bitSet(HHseq,beatSeqSelexLookahead);
+    bitSet(HHseq,beatSeqSelexLookahead);                 //set next step to HH
     
   } else {
-    digitalWrite(LED,LOW);
-    bitSet(SDseq,beatSeqSelexLookahead);
+//    digitalWrite(LED,LOW);
+    bitSet(SDseq,beatSeqSelexLookahead);                 //set next step to SD
   }
 }
 
-if(beatErase){
-  byte beatSeqSelexLookahead = (beatSeqSelex-1)%16;
-  bitClear(BDseq,beatSeqSelexLookahead);
-  bitClear(SDseq,beatSeqSelexLookahead);
-  bitClear(HHseq,beatSeqSelexLookahead);
+if(beatErase){                                           
+  byte beatSeqSelexLookahead = (beatSeqSelex-1)%16;     //if beat erase is activated
+  bitClear(BDseq,beatSeqSelexLookahead);                //erase BD
+  bitClear(SDseq,beatSeqSelexLookahead);                //erase SD
+  bitClear(HHseq,beatSeqSelexLookahead);                //erase HH
 }
 
 
   
-  //Tempo = 3 + slowMo;                                    //half the tempo on every other bar
+  Tempo = baseTempo + slowMo;                                    //half the tempo on every other bar
    WDTCR = 1<<WDIE | Tempo<<WDP0; // 4 Hz interrupt
   sei();                                                          // Allow interrupts
   WDTCR |= 1 << WDIE;                                             //no idea what this is
   unsigned long Chord = (Chords[selex]) << ((barTicker % 2)*melodyOffset)+((partTicker%(modulationinterval))*melodyOffsetOffset);                    //>> counter  (or barTicker % 2) is modulation Modulate
  
   for (int Note = 0; Note < 32; Note++) {                         //step through each bit of the 32bit number
-    if ((Chord & 0x80000000) != 0) {                              //check if there are any notes in this chord ?
+    if ((Chord & 0x80000000) != 0) {                              //check if there are any notes in this chord
       Freq[Chan] = Scale[Note]>>octArray[selex];                  //look up the notes frequency and shift the octave as per the array
-      Amp[Chan] = 1 + dist << (Decay + 5);                               // change to 2 for epic dist
+      Amp[Chan] = 1 + dist << (Decay + 5);                        // change to 2 for epic dist
       Chan = (Chan + 1) % (Channels - 1);
     }
     Chord = Chord << 1;
   }
   
-  selex++;
-  if (selex >= initBarLength) {
-    barTicker++;
-    //t=0;
-    selex = 0;
+  selex++;                                                        // add one to the selector for chords (step ahead in the index)
+  if (selex >= initBarLength) {                                   //if we reached the end
+    barTicker++;                                                  //add one to the bar counter
+    //t=0;                                        
+    selex = 0;                                                    //reset the selector
     
   }
-  if(barTicker>2){
-    barTicker = 1;
-    if(!myFirstSongMode){
-    addNote();
-    partTicker++;
+  if(barTicker>3){                                                //every 4 bars
+    barTicker = 0;                                                //reset bar counter
+    if(!myFirstSongMode | disableNoteAddition){                   //if we are allowed to
+    addNote();                                                    //add a "random" note
+    deleteNote();
+    partTicker++;                                                 //increment the part ticker
+    
     }
-    //deleteRandom();
   }
-  if(partTicker>4){
+  if(partTicker>3){
     songTicker++;
     if(!myFirstBeatMode){
     gener8BDbeat();
     gener8SDbeat();
     gener8hats();
     }
-    partTicker = 1;
+    partTicker = 0;
   }
   t = 0;
 }

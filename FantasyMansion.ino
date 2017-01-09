@@ -4,7 +4,7 @@
     TO DO
     toggle AMP multiplier to turn dist on and off
     make it play arpeggios
-    make it switch toneart every 8 steps perhaps
+    make it switch to neart every 8 steps perhaps
 
 */
 
@@ -76,6 +76,8 @@ bool eraseNote = false;
 bool noteWritten = false;
 bool preserveMelody = false;
 bool preserveBeat = false;
+bool disableNoteAddition = true;
+
 
 bool BANG_L;
 bool BONG_L;
@@ -127,6 +129,7 @@ byte chordIntevals[9] {
 };
 
 #define Channels 4
+byte baseTempo = 3;
 byte Tempo = 3;      // 4 = 4 beats per second
 byte Decay = 8;      // Length of note decay; max 10
 
@@ -161,7 +164,7 @@ void setup() {
 
   randomSeed(randSeed);
   //randomSeed(100);
-  refreshRandom();
+  //refreshRandom();
 
   // Enable 64 MHz PLL and use as source for Timer1
   PLLCSR = 1 << PCKE | 1 << PLLE;
@@ -187,7 +190,8 @@ void setup() {
   gener8BDbeat();
   gener8SDbeat();
   gener8hats();
-  gener8Melody();
+  //gener8Melody();
+  melodyTEST();
 
 
 

@@ -179,11 +179,12 @@ void myFirstBeat() {
 void chordtest() {
   if (firstRun) {
     ownBeat = true;
-    clearMelody();
+   // clearMelody();
     play = true;
     //gener8BDbeat();
     clearDrums();
-    generateChords();
+    //generateChords();
+   // melodyTEST();
     BDseq = 0b1111000000101010;
     firstRun = false;
   }

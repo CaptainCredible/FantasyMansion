@@ -55,8 +55,9 @@ if (bitRead(Chords[steppo],i)){
 
 ///////////////////////////////////////////////////////////////////////////////////////
 int generateOctaves() {
-  for (int i = 0; i < 16; i++) {
-    octArray[i] = random(0, 2);
+  for (int i = 0; i < random(16); i++) {
+//    octArray[i] = random(0, 2);
+bitSet(octArray,random(16));
   }
 }
 

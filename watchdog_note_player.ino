@@ -25,7 +25,7 @@ void playNextNote() {
     } else if (EXX > 31) {
       EXX = 31;
     }
-    bitSet(Chords[(selex+1)%16], EXX);
+    bitSet(Chords[(selex + 1) % 16], EXX);
   }
   if (eraseNote) {
     Chords[selex] = 0;
@@ -60,38 +60,42 @@ void playNextNote() {
   WDTCR = 1 << WDIE | Tempo << WDP0; // 4 Hz interrupt
   sei();                                                          // Allow interrupts
   WDTCR |= 1 << WDIE;                                             //no idea what this is
-   
-  for (int Note = 0; Note < 32; Note++) {                         //step through each bit of the 32bit number
-  oct = 0;
-    if (bitRead(Chords[(selex)%barLength],Note)){
-      Freq[Chan] = Scale[((Note*-1)+31)-modulationinterval*(barTicker%2)] >> oct;                    //look up the notes frequency and shift the octave as per the array
-      Amp[Chan] = 1 + (bitRead(dists,selex)) << (Decay + 5);                        // change to 2 for epic dist
-      Chan = (Chan + 1) % (Channels - 1);
+
+
+  ///////CHORDSPLAY///////
+  if (MELODY) {
+    for (int Note = 0; Note < 32; Note++) {                         //step through each bit of the 32bit number
+      oct = 0;
+      if (bitRead(Chords[(selex) % barLength], Note)) {
+        Freq[Chan] = Scale[((Note * -1) + 31) - modulationinterval * (barTicker % 2)] >> oct;          //look up the notes frequency and shift the octave as per the array
+        Amp[Chan] = 1 + (bitRead(dists, selex)) << (Decay + 5);                       // change to 2 for epic dist
+        Chan = (Chan + 1) % (Channels - 1);
+      }
     }
   }
 
-
-
-  for (int Note = 0; Note < 32; Note++) {                         //step through each bit of the 32bit number
-    if (bitRead(ChordsB[(selex)%barLength],Note)){
-      Freq[Chan] = Scale[(Note*-1)+31] >> 2;                    //look up the notes frequency and shift the octave as per the array
-      Amp[Chan] = 1 + (bitRead(dists,selex)) << (decays[selex%16] + 5);                        // change to 2 for epic dist
-      Chan = (Chan + 1) % (Channels - 1);
+  ////////BASSPLAY////////
+  if (BASS) {
+    for (int Note = 0; Note < 32; Note++) {                         //step through each bit of the 32bit number
+      if (bitRead(ChordsB[(selex) % barLength], Note)) {
+        Freq[Chan] = Scale[(Note * -1) + 31] >> 2;                //look up the notes frequency and shift the octave as per the array
+        Amp[Chan] = 1 + (bitRead(dists, selex)) << (decays[selex % 16] + 5);                     // change to 2 for epic dist
+        Chan = (Chan + 1) % (Channels - 1);
+      }
     }
   }
 
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
   selex++;                                                     // add one to the selector for chords (step ahead in the index)
-  if (selex > barLength-1) {                                   //if we reached the end
+  if (selex > barLength - 1) {                                 //if we reached the end
     barTicker++;                                                  //add one to the bar counter
-    if (barTicker>>1){
+    if (barTicker >> 1) {
       gener8SDbeat();
       gener8hats();
     }
-//    generatePortBLenghts();
-    t=0;
+    //    generatePortBLenghts();
+    t = 0;
     selex = 0;                                                    //reset the selector
 
   }
@@ -114,7 +118,7 @@ void playNextNote() {
     partTicker = 0;
   }
   t = 0;                                                         //set portBt back to 0 so portBs are audible
-  
+
 }
 
 

@@ -8,8 +8,8 @@ void gener8BDbeat() {
   BDseq = 0;
 
   for (int i = 15; i > -1; i--) {
-    if (i % 2 == 0) {
-      if (random(0, 3) == 0) {           //each even step has a 1 in 4 chance of generating a BD
+    if (i % 4 == 0) {
+      if (random(5) < 4) {           //each 4th step has a 3 in 4 chance of generating a BD
         bitSet(BDseq, i);               //set this seq step high
       }
     }

@@ -1,8 +1,8 @@
 void musicbox() {
   //bitSet(BOOLS_A, 1);   //rewrite for smalle code
-  if(firstRun){               //one time code
-  play = true;
-  firstRun = false;
+  if (firstRun) {             //one time code
+    play = true;
+    firstRun = false;
   }
   if (leftSwitch) {    //if left button is in
     //gener8SDbeat();
@@ -23,6 +23,7 @@ void musicbox() {
     bend = false;
     Decay = 7;
     distAmount = 0;
+
     if (BONG_L) {            //if this is transition from On to Off
       octOffset = 2;
       if (!ownBeat) {
@@ -30,6 +31,20 @@ void musicbox() {
       }
       selector = random(1, 17);
       disablePortB = !disablePortB;
+    }
+
+    if (BONG_R) {            //if this is transition from On to Off
+      playMode++;
+      if (playMode % 3 == 0) {
+        BASS = true;
+        MELODY = true;
+      } else if (playMode % 3 == 1) {
+        MELODY = true;
+        BASS = false;
+      }else{
+        MELODY = false;
+        BASS = true;
+      }
     }
 
 
@@ -132,7 +147,7 @@ void myFirstSong() {
   if (firstRun) {
     preserveMelody = true;
     clearMelody();
-      myFirstSongMode = true;
+    myFirstSongMode = true;
     firstRun = false;
   }
 
@@ -182,14 +197,14 @@ void chordtest() {
   if (firstRun) {
     clearDrums();
     ownBeat = false;
-   // clearMelody();
+    // clearMelody();
     play = true;
     gener8BDbeat();
     gener8SDbeat();
     gener8hats();
-    
+
     //generateChords();
-   // melodyTEST();
+    // melodyTEST();
     BDseq = 0b1000100010001000;
     //SDseq = 0b0000100000001111;
     firstRun = false;

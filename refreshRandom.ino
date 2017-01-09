@@ -14,4 +14,7 @@ void refreshRandom() {
   gener8SDbeat();
   gener8hats();
   generateOctaves();
+//  generatePortBLenghts();
 }
+
+

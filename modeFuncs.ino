@@ -1,7 +1,9 @@
 void musicbox() {
   //bitSet(BOOLS_A, 1);   //rewrite for smalle code
+  if(firstRun){               //one time code
   play = true;
-
+  firstRun = false;
+  }
   if (leftSwitch) {    //if left button is in
     //gener8SDbeat();
     Decay = 4;
@@ -178,14 +180,18 @@ void myFirstBeat() {
 
 void chordtest() {
   if (firstRun) {
-    ownBeat = true;
+    clearDrums();
+    ownBeat = false;
    // clearMelody();
     play = true;
     //gener8BDbeat();
-    clearDrums();
+    //gener8SDbeat();
+    //gener8hats();
+    
     //generateChords();
    // melodyTEST();
-    BDseq = 0b1111000000101010;
+    BDseq = 0b1000100010001000;
+    SDseq = 0b0000100000001111;
     firstRun = false;
   }
 

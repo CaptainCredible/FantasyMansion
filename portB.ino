@@ -2,7 +2,7 @@ void portB() {
   if (!disablePortB) {
 
     if (t < portBlength && portBticker) {                                                       //set length of drum sounds
-      beatSeqSelex = 16 - selex;    //invert selex to read binary number from left to right
+      beatSeqSelex = (64 - selex)%16;    //invert selex to read binary number from left to right
 
       if (bitRead(BDseq, beatSeqSelex) == 1) {
         PORTB = (PORTB & B11111101) | t * (t >> 3) >> (t >> 4);

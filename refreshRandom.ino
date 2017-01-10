@@ -8,9 +8,13 @@ void refreshRandom() {
   scalesOffset = random(0,3)*10;
   Decay = random(5,10);//   5 absolute min
   modulationinterval = 2^random(1,4);
-  gener8Melody();
+  //gener8Melody();
+  melodyTEST();
   gener8BDbeat();
   gener8SDbeat();
   gener8hats();
   generateOctaves();
+//  generatePortBLenghts();
 }
+
+

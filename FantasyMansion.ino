@@ -1,5 +1,6 @@
+#include <avr/pgmspace.h>
 
-
+byte bootMode = 0; //0=normal 1=tones&sync 4=beat&sync
 /*
     TO DO
     toggle AMP multiplier to turn dist on and off
@@ -10,7 +11,7 @@
 
 # define birthdate 30798 //birthdate
 
-byte mode = 1;
+byte mode = 10;
 #define numberOfModes 10
 #define LED 1    //digital pin 1
 #define LDR 1    //analog pin 1
@@ -29,68 +30,99 @@ byte xMode = 0;
 int oldX = 0;
 byte selex = 0;
 int t = 0;             //drum portB timer
+byte s = 0;
+
 byte melodyOffset = 4;
 byte melodyOffsetOffset = 4;
 byte scalesOffset = 0;
 
 int barTicker = 1;
-//int scalesOffset = 10;   was used to select from premade scales, new code will generate scales on the fly
+//int scalesOffset = 10;   was used to select from premade scales, new code will generate scales on the fly ?
 int portBlength = 200;
 byte selector = random(1, 17);
 byte partTicker = 1;
 byte songTicker = 1;
 byte modulationinterval = 2;
 byte octOffset = 2;
-
 byte distAmount = 0;
 byte beatSeqSelex = 0;
 //byte beatSeqSelexLookahead = 0;
 
-// these bools can be replaced with a single byte if need be
 unsigned long dists = 0B00000000001000000100000001000001;
 
-bool leftSwitch = false;
-bool rightSwitch = false;
-bool slowMo = false;
-bool portBticker = true;
-bool tickerFlag = true;
-bool dist = false;
-bool oldLeftSwitch = false;
-bool oldRightSwitch = false;
-
-byte BOOLS_A = B1000000;
-
-
-bool play = false;                //0
-bool slolo = false;               //1
-bool Blink = false;               //2
-bool blinkTicker = false;         //3
-bool doubleButt = false;          //4
-bool bend = false;                //5
-bool disablePortB = false;        //6
-bool firstRun = true;             //7
-
-bool myFirstSongMode = false;
-bool myFirstBeatMode = false;
-bool plex = true;
-bool writeNote = false;
-bool eraseNote = false;
-bool noteWritten = false;
-bool preserveMelody = false;
-bool preserveBeat = false;
-bool allowNoteAddition = false;
-bool allowTranspose = true;
-
-
-bool BANG_L;
-bool BONG_L;
-bool BANG_R;
-bool BONG_R;
-bool beatWrite = false;
-bool beatErase = false;
-bool ownBeat = false;
-bool BASS = true;
-bool MELODY = true;
+struct bools {
+  bool leftSwitch: 1;
+  bool rightSwitch: 1;
+  bool slowMo: 1;
+  bool portBticker: 1;
+  bool tickerFlag: 1;
+  bool dist: 1;                              //not used (replaced by dists[]
+  bool oldLeftSwitch: 1;
+  bool oldRightSwitch: 1;
+  bool play: 1;
+  bool slolo: 1;                             //not used
+  bool Blink: 1;
+  bool blinkTicker: 1;
+  bool doubleButt: 1;
+  bool bend: 1;
+  bool disablePortB: 1;
+  bool firstRun: 1;
+  bool myFirstSongMode: 1;
+  bool myFirstBeatMode: 1;
+  bool plex: 1;
+  bool writeNote: 1;
+  bool eraseNote: 1;
+  bool noteWritten: 1;                 //not used
+  bool preserveMelody: 1;              
+  bool preserveBeat: 1;               //not used (preservemelody does this too
+  bool allowNoteAddition: 1;
+  bool allowTranspose: 1;             //notUsed
+  bool BANG_L: 1;
+  bool BONG_L: 1;
+  bool BANG_R: 1;
+  bool BONG_R: 1;
+  bool beatWrite: 1;
+  bool beatErase: 1;
+  bool ownBeat: 1;
+  bool BASS: 1;
+  bool MELODY: 1;
+} bools = {
+  .leftSwitch = false,
+  .rightSwitch = false,
+  .slowMo = false,
+  .portBticker = true,
+  .tickerFlag = true,
+  .dist = false,
+  .oldLeftSwitch = false,
+  .oldRightSwitch = false,
+  .play = false,
+  .slolo = false,
+  .Blink = false,
+  .blinkTicker = false,
+  .doubleButt = false,
+  .bend = false,
+  .disablePortB = false,
+  .firstRun = true,
+  .myFirstSongMode = false,
+  .myFirstBeatMode = false,
+  .plex = false,
+  .writeNote = false,
+  .eraseNote = false,
+  .noteWritten = false,
+  .preserveMelody = false,
+  .preserveBeat = false,
+  .allowNoteAddition = false,
+  .allowTranspose = true,
+  .BANG_L = false,
+  .BONG_L = false,
+  .BANG_R = false,
+  .BONG_R = false,
+  .beatWrite = false,
+  .beatErase = false,
+  .ownBeat = false,
+  .BASS = true,
+  .MELODY = true,
+};
 
 
 int bender = 0;
@@ -117,7 +149,7 @@ byte barLength = initBarLength;
 // here are the notes pitches bitches
 
 
-unsigned int Scale[32] = {
+const uint16_t PROGMEM Scale[32] = {
   681,  721,  764,  809,  858,  909,  963, 1020, 1080, 1145, 1213, 1286,
   1362, 1429, 1529, 1620, 1716, 1818, 1926, 2041, 2162, 2291, 2427, 2571,
   2724, 2886, 3058, 3240, 3432, 3636, 3850, 4080
@@ -132,7 +164,7 @@ byte currentScale[30] {
 };
 
 byte chordIntervalSelector = 0; //0 Minor, 1 Major, 3 Power
-byte chordIntevals[9] {
+const byte PROGMEM chordIntevals[9] {
   0, 3,  7,      //MINOR
   0, 4,  7,      //MAJOR
   0, 5, 12       //POWER
@@ -148,56 +180,54 @@ volatile unsigned int Freq[Channels];
 unsigned int Amp[Channels];
 
 //unsigned long Chords[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}; //This is the chords we will be playing and modifying
-
-
 unsigned long Chords[16] = {
   0B00000000000010000000000000000000,
-  0B00000000000000001000000000000000,
-  0B00000000000000000001000000000000,
-  0B00000000000000001000000000000000,
-  0B00000000000000000000000010000000,
-  0B00000000000000000001000000000000,
-  0B00000000000000000000000000001000,
-  0B00000000000000000000000010000000,
+  0B00000000000000000000000000000000,
   0B00000000000010000000000000000000,
-  0B00000000000000001000000000000000,
   0B00000000000000000001000000000000,
-  0B00000000000000001000000000000000,
-  0B00000000000000000000000010000000,
+  0B00000000000010000000000000000000,
+  0B00000000000000000000000000000000,
+  0B00000000000010000000000000000000,
+  0B00000000000000000000000000000000,
+  0B00000000000010000000000000000000,
   0B00000000000000000001000000000000,
-  0B00000000000000000000000000001000,
-  0B00000000000000000000000010000000
+  0B00000000000010000000000000000000,
+  0B00000000000000000000000000000000,
+  0B00000000000010000000000000000000,
+  0B00000000000010000000000000000000,
+  0B00000000000010000000000000000000,
+  0B00000000000010000000000000000000
 };
 
-int doublers = 0B0001000100000000;
+int doublers = 0B0001000100000000;                                                                            //NOT YET IMPLEMENTED
 
-int ChordsB[16] = {
-  0B1000000000000000,
+unsigned int ChordsB[16] = {
   0B0000000000000000,
-  0B0000000000000000,
-  0B0100000000000000,
-  0B0000000000000000,
-  0B0000000000000000,
-  0B0100000000000000,
-  0B0000000000000000,
+  0B0000000000001000,
   0B0000000000000000,
   0B1000000000000000,
   0B0000000000000000,
+  0B0000000000001000,
   0B0000000000000000,
-  0B1000000000000000,
+  0B0000000000000000,
+  0B0000000000001000,
   0B0000000000000000,
   0B0000000000000000,
-  0B1000000000000000
+  0B0000000000000000,
+  0B0000000000001000,
+  0B0000000000000000,
+  0B0000000000000000,
+  0B0000000000000000
 
 };
 
 byte decays[16] {
-  5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5
+   5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5
 };
 
 
 
-byte soloScales[20] {
+const uint8_t PROGMEM soloScales[20] {
   0, 3, 7, 12, 15, 19, 24, 27, 31, 35, //minor
   0, 4, 7, 12, 6,  19, 14, 24, 28, 31 //pentatonic
 };
@@ -214,10 +244,17 @@ void setup() {
   pinMode(SW1, INPUT_PULLUP);
   pinMode(SW2, INPUT_PULLUP);
   pinMode(LDRpin, INPUT_PULLUP);
-
+if(!digitalRead(SW1)){
+  bootMode = 1;
+} else if(!digitalRead(SW2)){
+  bootMode = 4;
+} else {
+  bootMode = 0;
+}
   int randSeed = (analogRead(LDR));
   //digitalWrite(LED, HIGH);
-  delay(400);
+  delay(200);
+  
   //digitalWrite(LED, LOW);
   //delay(400);
   randSeed = randSeed + (analogRead(LDR)) + birthdate;
@@ -228,7 +265,7 @@ void setup() {
   //gener8BD();
 
   // Enable 64 MHz PLL and use as source for Timer1
-  PLLCSR = 1 << PCKE | 1 << PLLE;
+  PLLCSR = 1 << PCKE | 1 << PLLE;                                                       //can remove
 
   // Set up Timer/Counter1 for PWM output
   TIMSK = 0;                     // Timer interrupts OFF
@@ -239,7 +276,7 @@ void setup() {
 
 
   // Set up Timer/Counter0 for 20kHz interrupt to output samples.
-  TCCR0A = 3 << WGM00;           // Fast PWM
+  TCCR0A = 3 << WGM00;           // Fast PWM                                            //can remove
   TCCR0B = 1 << WGM02 | 2 << CS00; // 1/8 prescale
   OCR0A = 99;                    // Divide by 100
   TIMSK = 1 << OCIE0A;           // Enable compare match, disable overflow
@@ -257,26 +294,27 @@ void setup() {
 
 
 void loop() {
+//  handleSyncOut();
   pinRead();          //check the states of the pins
   BANGdetectors();
   portB();       // run the portB function
   modeHandle();       //cycle throuth the modes when necessary
   xManip(xMode);   // manipulate x value : 1=insanepitchrange 2=megapitchrange 0 = donothing
-  if (!bend) {
+  if (!bools.bend) {
     bender = 0;
   }
   modeSelect();
 
   //ticker code
   /*
-    if ( ((barTicker % 2) == 0) && tickerFlag) {    //onetime code here!!!  THESE PREMISES SEEM WEIRD
-      tickerFlag = false;
+    if ( ((barTicker % 2) == 0) && bools.tickerFlag) {    //onetime code here!!!  THESE PREMISES SEEM WEIRD
+      bools.tickerFlag = false;
 
       //if (random(0, 3) == 0) {                                // randomicate it maybe make this happen on every iteration of barticker?                                        // shorten barLength if its half time
       //}
 
-    } else if ((barTicker % 2 ) && !tickerFlag) { //onetime off code here
-      tickerFlag = true;
+    } else if ((barTicker % 2 ) && !bools.tickerFlag) { //onetime off code here
+      bools.tickerFlag = true;
     }
     //gener8Melody();
     //barTicker = 0;

@@ -32,9 +32,9 @@
       break;
 
     case 8:
-      if (firstRun) {
+      if (bools.firstRun) {
         gener8Melody();
-        firstRun = false;
+        bools.firstRun = false;
       }
       musicbox();
       break;

@@ -1,17 +1,17 @@
 void musicbox() {
   //bitSet(BOOLS_A, 1);   //rewrite for smalle code
-  if (firstRun) {             //one time code
-    play = true;
-    firstRun = false;
+  if (bools.firstRun) {             //one time code
+    bools.play = true;
+    bools.firstRun = false;
   }
-  if (leftSwitch) {    //if left button is in
+  if (bools.leftSwitch) {    //if left button is in
     //gener8SDbeat();
     Decay = 4;
 
     playPortBsamp(t);
     t++;
 
-  } else if (rightSwitch) { //    If right button is in
+  } else if (bools.rightSwitch) { //    If right button is in
     // bend = true;
     xMode = 0;
     octOffset = (x >> 7);
@@ -20,30 +20,30 @@ void musicbox() {
 
   } else {                    //if no buttons are in
     xMode = 0;
-    bend = false;
+    bools.bend = false;
     Decay = 7;
     distAmount = 0;
 
-    if (BONG_L) {            //if this is transition from On to Off
+    if (bools.BONG_L) {            //if this is transition from On to Off
       octOffset = 2;
-      if (!ownBeat) {
+      if (!bools.ownBeat) {
         newDrums();
       }
       selector = random(1, 17);
-      disablePortB = !disablePortB;
+      bools.disablePortB = !bools.disablePortB;
     }
 
-    if (BONG_R) {            //if this is transition from On to Off
+    if (bools.BONG_R) {            //if this is transition from On to Off
       playMode++;
       if (playMode % 3 == 0) {
-        BASS = true;
-        MELODY = true;
+        bools.BASS = true;
+        bools.MELODY = true;
       } else if (playMode % 3 == 1) {
-        MELODY = true;
-        BASS = false;
+        bools.MELODY = true;
+        bools.BASS = false;
       }else{
-        MELODY = false;
-        BASS = true;
+        bools.MELODY = false;
+        bools.BASS = true;
       }
     }
 
@@ -53,12 +53,12 @@ void musicbox() {
 
 
 void trigOnChangeSolo() {
-  if (firstRun) {
-    ownBeat = false;
-    firstRun = false;
+  if (bools.firstRun) {
+    bools.ownBeat = false;
+    bools.firstRun = false;
   }
-  Blink = false;
-  play = false;
+  bools.Blink = false;
+  bools.play = false;
   //digitalWrite(LED, LOW);
   xMode = 0;
   diff = oldX - x;
@@ -67,51 +67,51 @@ void trigOnChangeSolo() {
     chordSolo(x);
 
   }
-  if (leftSwitch) {
+  if (bools.leftSwitch) {
     PORTB = (PORTB & B11111101) | t % ((t >> x) & (t >> 5)) ;
     t++;
   }
-  if (rightSwitch) {
+  if (bools.rightSwitch) {
     PORTB = (PORTB & B11111101) | ((t * (t >> 4 | t >> 9) | (t / 256 + x)&t >> 8)) ^ (t & t >> 8 | t >> 6);
     t++;
-    if (BANG_R) {
+    if (bools.BANG_R) {
       octaveselect++;
       if (octaveselect > 4) {
         octaveselect = 0;
-        //oldRightSwitch = true;
+        //bools.oldRightSwitch = true;
       }
     }
   }
-  //oldRightSwitch = false;
+  //bools.oldRightSwitch = false;
 }
 
 
 
 
 void trigOnPurifySolo() {
-  Blink = false;
-  play = false;
-  if (BANG_R) {
+  bools.Blink = false;
+  bools.play = false;
+  if (bools.BANG_R) {
     chordSolo(x);
   }
-  if (BANG_L) {
+  if (bools.BANG_L) {
     chordSolo(x + 10);
   }
 }
 
 
 void buttonSolos() {
-  play = false;
-  Blink = false;
-  if (rightSwitch) {
+  bools.play = false;
+  bools.Blink = false;
+  if (bools.rightSwitch) {
     xMode = 0;
     a = x / 10;
 
     playPortBsamp(t);
     t++;
-  } else if (leftSwitch) {
+  } else if (bools.leftSwitch) {
     xMode = 1;
-    bend = true;
+    bools.bend = true;
     Decay = 7;
     playNoteNow(x, octaveselect, 2);
   } else {
@@ -123,18 +123,18 @@ void buttonSolos() {
 
 
 void portBplayer() {
-  if (rightSwitch) {
-    Blink = false;
+  if (bools.rightSwitch) {
+    bools.Blink = false;
     a = x / 10;
-    bend = true;
+    bools.bend = true;
 
 
     playPortBsamp(t);
     t++;
-  } else if (leftSwitch) {
+  } else if (bools.leftSwitch) {
     refreshRandom();
   } else {
-    // Blink=true;
+    // bools.Blink=true;
     //refreshRandom();
     xMode = 0;
     octaveselect = random(0, 4);
@@ -144,23 +144,23 @@ void portBplayer() {
 
 
 void myFirstSong() {
-  if (firstRun) {
-    preserveMelody = true;
+  if (bools.firstRun) {
+    bools.preserveMelody = true;
     clearMelody();
-    myFirstSongMode = true;
-    firstRun = false;
+    bools.myFirstSongMode = true;
+    bools.firstRun = false;
   }
 
-  play = true;
-  if (rightSwitch) {
+  bools.play = true;
+  if (bools.rightSwitch) {
     xMode = 0;
-    writeNote = true;
-  } else if (leftSwitch) {
-    eraseNote = true;
+    bools.writeNote = true;
+  } else if (bools.leftSwitch) {
+    bools.eraseNote = true;
   } else {
-    writeNote = false;
-    eraseNote = false;
-    //noteWritten = false;
+    bools.writeNote = false;
+    bools.eraseNote = false;
+    //bools.noteWritten = false;
   }
 
 
@@ -170,44 +170,44 @@ void myFirstSong() {
 
 
 void myFirstBeat() {
-  if (firstRun) {
-    ownBeat = true;
-    preserveMelody = true; //this will actually preserve both
+  if (bools.firstRun) {
+    bools.ownBeat = true;
+    bools.preserveMelody = true; //this will actually preserve both
     //gener8BDbeat();
-    myFirstBeatMode = true;
-    play = true;
-    disablePortB = false;
-    firstRun = false;
+    bools.myFirstBeatMode = true;
+    bools.play = true;
+    bools.disablePortB = false;
+    bools.firstRun = false;
     BDseq = 0;
     SDseq = 0;
     HHseq = 0;
   }
-  if (rightSwitch) {
-    beatWrite = true;
-  } else if (leftSwitch) {
-    beatErase = true;
+  if (bools.rightSwitch) {
+    bools.beatWrite = true;
+  } else if (bools.leftSwitch) {
+    bools.beatErase = true;
   } else {
-    beatErase = false;
-    beatWrite = false;
+    bools.beatErase = false;
+    bools.beatWrite = false;
   }
 }
 
 
 void chordtest() {
-  if (firstRun) {
+  if (bools.firstRun) {
     clearDrums();
-    ownBeat = false;
+    bools.ownBeat = false;
     // clearMelody();
-    play = true;
-    gener8BDbeat();
-    gener8SDbeat();
-    gener8hats();
+    bools.play = true;
+   // gener8BDbeat();
+   // gener8SDbeat();
+   // gener8hats();
 
     //generateChords();
     // melodyTEST();
     BDseq = 0b1000100010001000;
     //SDseq = 0b0000100000001111;
-    firstRun = false;
+    bools.firstRun = false;
   }
 
 }

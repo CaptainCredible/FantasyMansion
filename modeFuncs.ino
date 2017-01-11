@@ -7,7 +7,7 @@ void musicbox() {
   if (bools.leftSwitch) {    //if left button is in
     //gener8SDbeat();
     Decay = 4;
-
+    
     playPortBsamp(t);
     t++;
 

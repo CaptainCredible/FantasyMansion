@@ -2,12 +2,21 @@
 
 // Watchdog interrupt plays notes
 ISR(WDT_vect) {  //interupt triggered by watchdog timer
-  
-  digitalWrite(bootMode,(selex+1)%2);
+  if (bootMode != 0) {
+    digitalWrite(bootMode, (selex + 1) % 2);
+    //if ((selex+1)%2==1){
+    //  PORTB = (PORTB & B11110111) | B00001000;
+    //} else {
+    //  PORTB = (PORTB & B11110111) | B00000000;
+    //}
+  }
+
   if (bools.play) {                                                      //if we "flag play"
-    playNextNote();                                                  //play the next stored note
-    t = 0;
-    s = 0;
+    
+//    mood = modsSeq[selex];
+    playNextNote();                                                      //play the next stored note
+    t = 1;
+    s = 4;
   }
 
   //if(bools.slolo){                                                      //if its a slolo    SLOLO ISNT USED
@@ -69,7 +78,7 @@ void playNextNote() {
 
 
   ///////CHORDSPLAY///////
-  if (bools.MELODY && bootMode != 2) {
+  if (bools.MELODY && bootMode != 4) {
     for (int Note = 0; Note < 32; Note++) {                         //step through each bit of the 32bit number
       oct = 0;
       if (bitRead(Chords[(selex) % barLength], Note)) {
@@ -82,7 +91,7 @@ void playNextNote() {
   }
 
   ////////BASSPLAY////////
-  if (bools.BASS && bootMode != 2) {
+  if (bools.BASS && bootMode != 4) {
     for (int Note = 0; Note < 32; Note++) {                         //step through each bit of the 16bit number
       if (bitRead(ChordsB[(selex) % barLength], Note)) {
         int freqSelector = ((Note * -1) + 15); - modulationinterval * (barTicker % 2);
@@ -129,7 +138,7 @@ void playNextNote() {
 
 }
 /*
-void handleSyncOut() {
+  void handleSyncOut() {
   if (bootMode == 1) {
     //delay(100000000);
     if ((selex-1) % 4 == 0) {
@@ -141,6 +150,6 @@ void handleSyncOut() {
       }
     }
   }
-}
+  }
 */
 

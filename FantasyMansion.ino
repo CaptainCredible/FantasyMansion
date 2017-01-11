@@ -11,7 +11,11 @@ byte bootMode = 0; //0=normal 1=tones&sync 4=beat&sync
 
 # define birthdate 30798 //birthdate
 
+bool syncFlipFlop = false;
+
 byte mode = 10;
+
+//byte pinBstate = 
 #define numberOfModes 10
 #define LED 1    //digital pin 1
 #define LDR 1    //analog pin 1
@@ -20,6 +24,8 @@ byte mode = 10;
 #define SW2 3
 #define tonepin 4
 #define portBpin 1
+
+int portBlength = 200;
 
 byte playMode = 0;
 byte octaveselect = 0;
@@ -30,7 +36,7 @@ byte xMode = 0;
 int oldX = 0;
 byte selex = 0;
 int t = 0;             //drum portB timer
-byte s = 0;
+int s = 0;
 
 byte melodyOffset = 4;
 byte melodyOffsetOffset = 4;
@@ -38,7 +44,6 @@ byte scalesOffset = 0;
 
 int barTicker = 1;
 //int scalesOffset = 10;   was used to select from premade scales, new code will generate scales on the fly ?
-int portBlength = 200;
 byte selector = random(1, 17);
 byte partTicker = 1;
 byte songTicker = 1;
@@ -134,7 +139,8 @@ byte c = random(5, 31);
 unsigned int BDseq =   0b1000000010000000;
 unsigned int SDseq =   0b0101100000001000;
 unsigned int HHseq =   0b0000000000000000;
-unsigned int modsSeq = 0b0001000010000000;
+//byte modsSeq[16] = {3,3,3,3,3,3,3,3,5,5,4,4,4,3,4,3};//0b1111000010000000;
+int mood = 3; //how fast the t increases
 //byte portBlengths[8] = {50000,1000,500,600,2500,300,500,666};
 
 //byte octArray[16] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
@@ -157,6 +163,9 @@ const uint16_t PROGMEM Scale[32] = {
 
 byte bassTempo = 4;
 byte scaleSelect = 0;
+
+
+//can be moved to progmem
 byte currentScale[30] {
   33, 31, 28, 24, 19, 16, 12, 7, 4, 0, // CMinor    MAKE THESE STRICTER TO FIt THE CHORDS??
   0, 1, 5, 8, 12, 13, 17, 20, 24, 29, // CMAJOR
@@ -164,7 +173,9 @@ byte currentScale[30] {
 };
 
 byte chordIntervalSelector = 0; //0 Minor, 1 Major, 3 Power
-const byte PROGMEM chordIntevals[9] {
+
+//can be moved to progmem
+const byte chordIntevals[9] {
   0, 3,  7,      //MINOR
   0, 4,  7,      //MAJOR
   0, 5, 12       //POWER
@@ -203,11 +214,11 @@ int doublers = 0B0001000100000000;                                              
 
 unsigned int ChordsB[16] = {
   0B0000000000000000,
-  0B0000000000001000,
   0B0000000000000000,
+  0B0000000000001000,
   0B1000000000000000,
   0B0000000000000000,
-  0B0000000000001000,
+  0B0000000000000000,
   0B0000000000000000,
   0B0000000000000000,
   0B0000000000001000,
@@ -294,10 +305,9 @@ if(!digitalRead(SW1)){
 
 
 void loop() {
-//  handleSyncOut();
+  portB();
   pinRead();          //check the states of the pins
   BANGdetectors();
-  portB();       // run the portB function
   modeHandle();       //cycle throuth the modes when necessary
   xManip(xMode);   // manipulate x value : 1=insanepitchrange 2=megapitchrange 0 = donothing
   if (!bools.bend) {
@@ -310,7 +320,7 @@ void loop() {
     if ( ((barTicker % 2) == 0) && bools.tickerFlag) {    //onetime code here!!!  THESE PREMISES SEEM WEIRD
       bools.tickerFlag = false;
 
-      //if (random(0, 3) == 0) {                                // randomicate it maybe make this happen on every iteration of barticker?                                        // shorten barLength if its half time
+      //if (random(0, 3) == 0) {                                // randomicate it maybe make this happen on every iteration of barticker?       // shorten barLength if its half time
       //}
 
     } else if ((barTicker % 2 ) && !bools.tickerFlag) { //onetime off code here
@@ -328,6 +338,7 @@ void loop() {
 
 ISR(TIMER0_COMPA_vect) {
   generatePolyTones();
+  s++;
 }
 
 

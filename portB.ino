@@ -17,15 +17,14 @@ t=s>>mood;
       }
 
 
-      if (bitRead(SDseq, beatSeqSelex) == 1) {
+      if (bitRead(SDseq, beatSeqSelex) == 1 && t<(portBlength>>1)) {
         //t++;
-        PORTB = (PORTB & B11111101) | (t * (t >> 3) >> (t >> 7)) & B00000010;
+        PORTB = (PORTB & B11111101) | (s * (t >> 3) >> (t >> 7)) & B00000010;
       }
 
 
       if (bitRead(HHseq, beatSeqSelex) == 1) {
-        int f = (s>>1);
-        PORTB = (PORTB & B11111101) | (f * (f >> 7 | f >> 9 )) & B00000010; //( t * (t >> 3) >> (t >> 6))& B00000010;
+        PORTB = (PORTB & B11111101) | (s>>1 * (s>>1 >> 7 | s>>1 >> 9 )) & B00000010; //( t * (t >> 3) >> (t >> 6))& B00000010;
       }
 
 

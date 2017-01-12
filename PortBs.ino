@@ -44,10 +44,10 @@ byte OutPut(long i) {
       return i % ((i >> a) & (i >> c)) ;
       break;
 
-    case 8:
+   // case 8:
       //bad core
-      return i * ( ((i >> 9) & 10) | ((i >> 11)&a) ^ ((i >> b) & 15 & (i >> c)) );
-      break;
+   //   return i * ( ((i >> 9) & 10) | ((i >> 11)&a) ^ ((i >> b) & 15 & (i >> c)) );
+   //   break;
 
     case 9:
       //ROFL

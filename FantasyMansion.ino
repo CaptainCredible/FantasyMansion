@@ -15,7 +15,7 @@ bool syncFlipFlop = false;
 
 byte mode = 10;
 
-//byte pinBstate = 
+//byte pinBstate =
 #define numberOfModes 10
 #define LED 1    //digital pin 1
 #define LDR 1    //analog pin 1
@@ -56,6 +56,9 @@ byte beatSeqSelex = 0;
 unsigned long dists = 0B00000000001000000100000001000001;
 
 struct bools {
+  bool allowBDSeqMod: 1;
+  bool allowSDSeqMod: 1;
+  bool allowHHSeqMod: 1;
   bool leftSwitch: 1;
   bool rightSwitch: 1;
   bool slowMo: 1;
@@ -68,7 +71,7 @@ struct bools {
   bool slolo: 1;                             //not used
   bool Blink: 1;
   bool blinkTicker: 1;
-  bool doubleButt: 1;
+  bool doubleButt: 1;     //to make sure it only runs the doublebutt code once
   bool bend: 1;
   bool disablePortB: 1;
   bool firstRun: 1;
@@ -78,7 +81,7 @@ struct bools {
   bool writeNote: 1;
   bool eraseNote: 1;
   bool noteWritten: 1;                 //not used
-  bool preserveMelody: 1;              
+  bool preserveMelody: 1;
   bool preserveBeat: 1;               //not used (preservemelody does this too
   bool allowNoteAddition: 1;
   bool allowTranspose: 1;             //notUsed
@@ -92,6 +95,9 @@ struct bools {
   bool BASS: 1;
   bool MELODY: 1;
 } bools = {
+  .allowBDSeqMod = true,
+  .allowSDSeqMod = true,
+  .allowHHSeqMod = true,
   .leftSwitch = false,
   .rightSwitch = false,
   .slowMo = false,
@@ -233,7 +239,7 @@ unsigned int ChordsB[16] = {
 };
 
 byte decays[16] {
-   5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5
+  5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5
 };
 
 
@@ -255,18 +261,28 @@ void setup() {
   pinMode(SW1, INPUT_PULLUP);
   pinMode(SW2, INPUT_PULLUP);
   pinMode(LDRpin, INPUT_PULLUP);
-if(!digitalRead(SW1)){
-  bootMode = 1;
-} else if(!digitalRead(SW2)){
-  bootMode = 4;
-} else {
-  bootMode = 0;
-}
+
+  if (!digitalRead(SW1) && !digitalRead(SW2)) { // if both buttons are pushed upon boot
+    while (bootMode == 0) {                    //check witch one is released first to decide sync mode
+      if (digitalRead(SW1)) {
+        bootMode = 1;
+      } else if (digitalRead(SW2)) {
+        bootMode = 4;
+      }
+    }
+  } else if (!digitalRead(SW1)) {             //only SW1 means mode 10
+    bootMode = 10;
+  } else if (!digitalRead(SW2)) {             //only SW2 means mode 20
+    bootMode = 20;
+  } else {
+    bootMode = 0;
+  }
+
   int randSeed = (analogRead(LDR));
   //digitalWrite(LED, HIGH);
   delay(200);
-  
-  //digitalWrite(LED, LOW);
+
+  //digitalWrite(LED, LOW);   
   //delay(400);
   randSeed = randSeed + (analogRead(LDR)) + birthdate;
 

@@ -196,7 +196,11 @@ void myFirstBeat() {
 void chordtest() {
   if (bools.firstRun) {
     clearDrums();
-    bools.ownBeat = false;
+    bools.ownBeat = true;
+    bools.allowBDSeqMod = false;
+    bools.allowHHSeqMod = false;
+    bools.allowSDSeqMod = false;
+    // bools.myFirstBeatMode = true;
     // clearMelody();
     bools.play = true;
    // gener8BDbeat();
@@ -206,7 +210,8 @@ void chordtest() {
     //generateChords();
     // melodyTEST();
     BDseq = 0b1000100010001000;
-    //SDseq = 0b0000100000001111;
+    SDseq = 0b0001001000000011;
+    HHseq = 0b0000000000100000;
     bools.firstRun = false;
   }
 

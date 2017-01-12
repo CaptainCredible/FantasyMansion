@@ -4,16 +4,10 @@
 ISR(WDT_vect) {  //interupt triggered by watchdog timer
   if (bootMode != 0) {
     digitalWrite(bootMode, (selex + 1) % 2);
-    //if ((selex+1)%2==1){
-    //  PORTB = (PORTB & B11110111) | B00001000;
-    //} else {
-    //  PORTB = (PORTB & B11110111) | B00000000;
-    //}
   }
 
   if (bools.play) {                                                      //if we "flag play"
-    
-//    mood = modsSeq[selex];
+
     playNextNote();                                                      //play the next stored note
     t = 1;
     s = 4;
@@ -23,16 +17,14 @@ ISR(WDT_vect) {  //interupt triggered by watchdog timer
   //chordSolo(x);                                                   //slolo bitch
   //}
 
-  if (bools.Blink) {
-    bools.blinkTicker = !bools.blinkTicker;
-    //digitalWrite(LED, bools.blinkTicker);
-  }
+//  if (bools.Blink) {
+//    bools.blinkTicker = !bools.blinkTicker;
+//  }
 
 }
 
 void playNextNote() {
   if (bools.writeNote) {
-    //digitalWrite(LED,HIGH);                    //what LED?
     int EXX = (x * -1) + 600;                    //EXX is remapped x
     EXX = EXX / 10;
     if (EXX < 0) {
@@ -40,7 +32,7 @@ void playNextNote() {
     } else if (EXX > 31) {
       EXX = 31;
     }
-    bitSet(Chords[(selex + 1) % 16], EXX);
+    bitSet(Chords[(selex) % 16], EXX);
   }
   if (bools.eraseNote) {
     Chords[selex] = 0;
@@ -108,14 +100,17 @@ void playNextNote() {
   if (selex > barLength - 1) {                                 //if we reached the end
     barTicker++;                                                  //add one to the bar counter
     if (barTicker >> 1) {
-      gener8SDbeat();
-      gener8hats();
+      if (bools.allowSDSeqMod) {
+        gener8SDbeat();
+      }
+      if (bools.allowHHSeqMod) {
+        gener8hats();
+      }
     }
-    //    generatePortBLenghts();
     t = 0;
     selex = 0;                                                    //reset the selector
-
   }
+
   if (barTicker > 3) {                                            //every 4 bars
     barTicker = 0;                                                //reset bar counter
     if (!bools.myFirstSongMode && bools.allowNoteAddition) {                 //if we are allowed to

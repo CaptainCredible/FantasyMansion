@@ -68,11 +68,11 @@ void trigOnChangeSolo() {
 
   }
   if (bools.leftSwitch) {
-    PORTB = (PORTB & B11111101) | (t % ((t >> x) & (t >> 5))) & mask ;
+    PORTB = (PORTB & ~mask) | (t % ((t >> x) & (t >> 5))) & mask ;
     t++;
   }
   if (bools.rightSwitch) {
-    PORTB = (PORTB & B11111101) | (((t * (t >> 4 | t >> 9) | (t / 256 + x)&t >> 8)) ^ (t & t >> 8 | t >> 6)) & mask;
+    PORTB = (PORTB & ~mask) | (((t * (t >> 4 | t >> 9) | (t / 256 + x)&t >> 8)) ^ (t & t >> 8 | t >> 6)) & mask;
     t++;
     if (bools.BANG_R) {
       octaveselect++;
@@ -214,6 +214,7 @@ void chordtest() {
     HHseq = 0b0000000000100000;
     bools.firstRun = false;
   }
-
+s++;
+playPortBsamp(s);
 }
 

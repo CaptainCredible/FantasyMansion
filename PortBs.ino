@@ -1,7 +1,8 @@
-void playPortBsamp(int i){
-  
-            PORTB = (PORTB & B11111101) | OutPut(i) & mask; //MASK THE PINS WE WANT TO WRITE TO
-      }
+void playPortBsamp(int i) {
+
+  //PORTB = (PORTB & ~mask) | (OutPut(i) & mask); //MASK THE PINS WE WANT TO WRITE TO
+  PORTB = (PORTB & ~mask) | (OutPut(i) & B00000000);//mask); //B00000010 ;
+}
 
 
 byte OutPut(long i) {
@@ -17,10 +18,10 @@ byte OutPut(long i) {
       return i * (i >> a | i >> b) & (c * 3) ;
       break;
 
-   // case 3:
-      // mandelbrots orgy, //seems a little crap, often silent
-   //   return (i >> b + i << c);
-   //   break;
+    // case 3:
+    // mandelbrots orgy, //seems a little crap, often silent
+    //   return (i >> b + i << c);
+    //   break;
 
     case 4:
       //long wank, Period = 16500
@@ -44,10 +45,10 @@ byte OutPut(long i) {
       return i % ((i >> a) & (i >> c)) ;
       break;
 
-   // case 8:
-      //bad core
-   //   return i * ( ((i >> 9) & 10) | ((i >> 11)&a) ^ ((i >> b) & 15 & (i >> c)) );
-   //   break;
+    // case 8:
+    //bad core
+    //   return i * ( ((i >> 9) & 10) | ((i >> 11)&a) ^ ((i >> b) & 15 & (i >> c)) );
+    //   break;
 
     case 9:
       //ROFL

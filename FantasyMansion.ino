@@ -1,6 +1,7 @@
 #include <avr/pgmspace.h>
 
 byte bootMode = 0; //0=normal 1=tones&sync 4=beat&sync
+byte mask = B00000010;
 /*
     TO DO
     toggle AMP multiplier to turn dist on and off
@@ -14,8 +15,6 @@ byte bootMode = 0; //0=normal 1=tones&sync 4=beat&sync
 bool syncFlipFlop = false;
 
 byte mode = 10;
-byte mask = B00000010; //B00000010;
-
 
 
 //byte pinBstate =
@@ -47,7 +46,7 @@ byte scalesOffset = 0;
 
 int barTicker = 1;
 //int scalesOffset = 10;   was used to select from premade scales, new code will generate scales on the fly ?
-byte selector = random(1, 17);
+byte selector = 1;//random(1, 17);
 byte partTicker = 1;
 byte songTicker = 1;
 byte modulationinterval = 2;
@@ -266,14 +265,15 @@ void setup() {
   pinMode(LDRpin, INPUT_PULLUP);
 
 
+//BOOTMODE
   if (!digitalRead(SW1) && !digitalRead(SW2)) { // if both buttons are pushed upon boot
-    while (bootMode == 0) {                    //check witch one is released first to decide sync mode
+    while (bootMode == 0) {                    //check witch one is released first to decide sync mode  //0=normal 1=tones&sync 4=beat&sync
       if (digitalRead(SW1)) {
         bootMode = 1;
-        mask = B00000010;          //mask portB to only output through beats pin
+        mask = B00001000;
       } else if (digitalRead(SW2)) {
         bootMode = 4;
-        mask = B00010000;         //mask portB to only output through tones pin
+        mask = B00000010;
       }
     }
   } else if (!digitalRead(SW1)) {             //only SW1 means mode 10
@@ -281,14 +281,14 @@ void setup() {
   } else if (!digitalRead(SW2)) {             //only SW2 means mode 20
     bootMode = 20;
   } else {
-    bootMode = 0;
+    bootMode = 1;   //already defined as 0
   }
 
   int randSeed = (analogRead(LDR));
   //digitalWrite(LED, HIGH);
   delay(200);
 
-  //digitalWrite(LED, LOW);
+  //digitalWrite(LED, LOW);   
   //delay(400);
   randSeed = randSeed + (analogRead(LDR)) + birthdate;
 

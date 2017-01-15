@@ -1,6 +1,6 @@
 void playPortBsamp(int i){
   
-            PORTB = (PORTB & B11111101) | OutPut(i); //MASK THE PINS WE WANT TO WRITE TO
+            PORTB = (PORTB & B11111101) | OutPut(i) & mask; //MASK THE PINS WE WANT TO WRITE TO
       }
 
 
@@ -17,10 +17,10 @@ byte OutPut(long i) {
       return i * (i >> a | i >> b) & (c * 3) ;
       break;
 
-    case 3:
+   // case 3:
       // mandelbrots orgy, //seems a little crap, often silent
-      return (i >> b + i << c);
-      break;
+   //   return (i >> b + i << c);
+   //   break;
 
     case 4:
       //long wank, Period = 16500
@@ -88,10 +88,7 @@ byte OutPut(long i) {
       //skynetflix
       return i * (i >> a | i >> b) >> (i >> c);
       break;
-
-
     default:
-
       break;
   }
   return 0;

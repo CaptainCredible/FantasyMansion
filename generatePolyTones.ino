@@ -12,7 +12,6 @@ void generatePolyTones(){
     Note = (Env ^ Mask) + (Mask & 1);
     Sum = Sum + Note;
   }
-  //analogRead(1);
   OCR1B = Sum + 128;//128;
   
 }

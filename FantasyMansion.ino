@@ -14,6 +14,9 @@ byte bootMode = 0; //0=normal 1=tones&sync 4=beat&sync
 bool syncFlipFlop = false;
 
 byte mode = 10;
+byte mask = B00000010; //B00000010;
+
+
 
 //byte pinBstate =
 #define numberOfModes 10
@@ -262,12 +265,15 @@ void setup() {
   pinMode(SW2, INPUT_PULLUP);
   pinMode(LDRpin, INPUT_PULLUP);
 
+
   if (!digitalRead(SW1) && !digitalRead(SW2)) { // if both buttons are pushed upon boot
     while (bootMode == 0) {                    //check witch one is released first to decide sync mode
       if (digitalRead(SW1)) {
         bootMode = 1;
+        mask = B00000010;          //mask portB to only output through beats pin
       } else if (digitalRead(SW2)) {
         bootMode = 4;
+        mask = B00010000;         //mask portB to only output through tones pin
       }
     }
   } else if (!digitalRead(SW1)) {             //only SW1 means mode 10
@@ -282,7 +288,7 @@ void setup() {
   //digitalWrite(LED, HIGH);
   delay(200);
 
-  //digitalWrite(LED, LOW);   
+  //digitalWrite(LED, LOW);
   //delay(400);
   randSeed = randSeed + (analogRead(LDR)) + birthdate;
 

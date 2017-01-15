@@ -68,11 +68,11 @@ void trigOnChangeSolo() {
 
   }
   if (bools.leftSwitch) {
-    PORTB = (PORTB & B11111101) | t % ((t >> x) & (t >> 5)) ;
+    PORTB = (PORTB & B11111101) | (t % ((t >> x) & (t >> 5))) & mask ;
     t++;
   }
   if (bools.rightSwitch) {
-    PORTB = (PORTB & B11111101) | ((t * (t >> 4 | t >> 9) | (t / 256 + x)&t >> 8)) ^ (t & t >> 8 | t >> 6);
+    PORTB = (PORTB & B11111101) | (((t * (t >> 4 | t >> 9) | (t / 256 + x)&t >> 8)) ^ (t & t >> 8 | t >> 6)) & mask;
     t++;
     if (bools.BANG_R) {
       octaveselect++;

@@ -17,9 +17,9 @@ ISR(WDT_vect) {  //interupt triggered by watchdog timer
   //chordSolo(x);                                                   //slolo bitch
   //}
 
-//  if (bools.Blink) {
-//    bools.blinkTicker = !bools.blinkTicker;
-//  }
+  //  if (bools.Blink) {
+  //    bools.blinkTicker = !bools.blinkTicker;
+  //  }
 
 }
 
@@ -74,10 +74,10 @@ void playNextNote() {
     for (int Note = 0; Note < 32; Note++) {                         //step through each bit of the 32bit number
       oct = 0;
       if (bitRead(Chords[(selex) % barLength], Note)) {
-        int freqSelector = ((Note * -1) + 31); - modulationinterval * (barTicker % 2);
-        Freq[Chan] = pgm_read_word_near(Scale + freqSelector) >> oct ;//Scale[freqSelector] >> oct;          //look up the notes frequency and shift the octave as per the array
-        Amp[Chan] = 1 + (bitRead(dists, selex)) << (Decay + 5);                       // change to 2 for epic dist
-        Chan = (Chan + 1) % (Channels - 1);
+        int freqSelector = ((Note * -1) + 31 - (modulationinterval * (barTicker % 3))*bools.transpose);
+                            Freq[Chan] = (pgm_read_word_near(Scale + freqSelector)) >> oct ;//Scale[freqSelector] >> oct;          //look up the notes frequency and shift the octave as per the array
+                            Amp[Chan] = 1 + (bitRead(dists, selex)) << (Decay + 5);                       // change to 2 for epic dist
+                            Chan = (Chan + 1) % (Channels - 1);
       }
     }
   }
@@ -86,7 +86,7 @@ void playNextNote() {
   if (bools.BASS && bootMode != 4) {
     for (int Note = 0; Note < 32; Note++) {                         //step through each bit of the 16bit number
       if (bitRead(ChordsB[(selex) % barLength], Note)) {
-        int freqSelector = ((Note * -1) + 15); - modulationinterval * (barTicker % 2);
+        int freqSelector = ((Note * -1) + 15) - modulationinterval * (barTicker % 3);
         Freq[Chan] = pgm_read_word_near(Scale + freqSelector) >> 2;                //look up the notes frequency and shift the octave as per the array
         Amp[Chan] = 3 + (bitRead(dists, selex)) << (decays[selex % 16] + 6);                     // change to 2 for epic dist
         Chan = (Chan + 1) % (Channels - 1);
@@ -117,7 +117,9 @@ void playNextNote() {
       addNote();                                                    //add a "random" note
       deleteNote(random(barLength));                                                 //remove a random note (or not if there is no note on the step we chose
       partTicker++;                                                 //increment the part ticker
-
+      if (bools.allowTranspose) {
+        bools.transpose = !bools.allowTranspose;
+      }
     }
   }
   if (partTicker > 3) {

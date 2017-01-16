@@ -193,13 +193,14 @@ void myFirstBeat() {
 }
 
 
-void chordtest() {
+void test() {
   if (bools.firstRun) {
     clearDrums();
     bools.ownBeat = true;
     bools.allowBDSeqMod = false;
     bools.allowHHSeqMod = false;
     bools.allowSDSeqMod = false;
+    bools.allowTranspose = true;
     // bools.myFirstBeatMode = true;
     // clearMelody();
     bools.play = true;
@@ -207,14 +208,14 @@ void chordtest() {
    // gener8SDbeat();
    // gener8hats();
 
-    //generateChords();
+    generateChords();
     // melodyTEST();
     BDseq = 0b1000100010001000;
     SDseq = 0b0001001000000011;
     HHseq = 0b0000000000100000;
     bools.firstRun = false;
   }
-s++;
-playPortBsamp(s);
+//s++;
+//playPortBsamp(s);
 }
 

@@ -1,5 +1,5 @@
- void modeSelect(){
- switch (mode) {
+void modeSelect() {
+  switch (mode) {
 
     case 1:
       musicbox();   //INIT STATE, WILL GENERATE ITS OWN BEAT AND MELODY WHEN IT CANT FIND A USER MADE CONTENT
@@ -44,13 +44,13 @@
       break;
 
     case 10:  //DEBUGMODE
-      
+
       //musicbox();
-      chordtest();
+      test();
       break;
 
     default:
       //digitalWrite(LED, HIGH);
       break;
   }
-  }
+}

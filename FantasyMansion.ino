@@ -58,6 +58,7 @@ byte beatSeqSelex = 0;
 unsigned long dists = 0B00000000001000000100000001000001;
 
 struct bools {
+  bool transpose: 1;
   bool allowBDSeqMod: 1;
   bool allowSDSeqMod: 1;
   bool allowHHSeqMod: 1;
@@ -97,6 +98,7 @@ struct bools {
   bool BASS: 1;
   bool MELODY: 1;
 } bools = {
+  .transpose = true,
   .allowBDSeqMod = true,
   .allowSDSeqMod = true,
   .allowHHSeqMod = true,
@@ -221,16 +223,16 @@ unsigned long Chords[16] = {
 int doublers = 0B0001000100000000;                                                                            //NOT YET IMPLEMENTED
 
 unsigned int ChordsB[16] = {
-  0B0000000000000000,
-  0B0000000000000000,
   0B0000000000001000,
-  0B1000000000000000,
-  0B0000000000000000,
-  0B0000000000000000,
   0B0000000000000000,
   0B0000000000000000,
   0B0000000000001000,
   0B0000000000000000,
+  0B0000000000000000,
+  0B0000000000001000,
+  0B0000000000000000,
+  0B0000000000000000,
+  0B0000000000001000,
   0B0000000000000000,
   0B0000000000000000,
   0B0000000000001000,
@@ -298,7 +300,7 @@ void setup() {
   //gener8BD();
 
   // Enable 64 MHz PLL and use as source for Timer1
-  PLLCSR = 1 << PCKE | 1 << PLLE;                                                       //can remove
+  //PLLCSR = 1 << PCKE | 1 << PLLE;                                                       //can remove
 
   // Set up Timer/Counter1 for PWM output
   TIMSK = 0;                     // Timer interrupts OFF
@@ -309,7 +311,7 @@ void setup() {
 
 
   // Set up Timer/Counter0 for 20kHz interrupt to output samples.
-  TCCR0A = 3 << WGM00;           // Fast PWM                                            //can remove
+  //TCCR0A = 3 << WGM00;           // Fast PWM                                            //can remove
   TCCR0B = 1 << WGM02 | 2 << CS00; // 1/8 prescale
   OCR0A = 99;                    // Divide by 100
   TIMSK = 1 << OCIE0A;           // Enable compare match, disable overflow

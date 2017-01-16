@@ -52,7 +52,7 @@ byte OutPut(long i) {
     //   return i * ( ((i >> 9) & 10) | ((i >> 11)&a) ^ ((i >> b) & 15 & (i >> c)) );
     //   break;
 
-    case 9:
+    /*case 9:
       //ROFL
       return i * ((i >> 3 | i >> b) & (a * 3)&i >> 9);
       break;
@@ -91,6 +91,7 @@ byte OutPut(long i) {
       //skynetflix
       return i * (i >> a | i >> b) >> (i >> c);
       break;
+      */
     default:
       break;
   }

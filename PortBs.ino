@@ -1,7 +1,9 @@
 void playPortBsamp(int i) {
 
   //PORTB = (PORTB & ~mask) | (OutPut(i) & mask); //MASK THE PINS WE WANT TO WRITE TO
-  PORTB = (PORTB & ~mask) | (OutPut(i) & B00000000);//mask); //B00000010 ;
+int OUT = OutPut(i);
+PORTB = (PORTB & ~mask) | (OUT & mask);//mask);
+// delay(1);
 }
 
 

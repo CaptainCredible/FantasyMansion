@@ -270,7 +270,7 @@ void setup() {
     while (bootMode == 0) {                    //check witch one is released first to decide sync mode  //0=normal 1=tones&sync 4=beat&sync
       if (digitalRead(SW1)) {
         bootMode = 1;
-        mask = B00001000;
+        mask = B00000000; // if we are in tones and sync mode, we dont want to let portBs out of the portBpin!
       } else if (digitalRead(SW2)) {
         bootMode = 4;
         mask = B00000010;
@@ -281,7 +281,7 @@ void setup() {
   } else if (!digitalRead(SW2)) {             //only SW2 means mode 20
     bootMode = 20;
   } else {
-    bootMode = 1;   //already defined as 0
+    //bootMode = 1;   //already defined as 0
   }
 
   int randSeed = (analogRead(LDR));

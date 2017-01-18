@@ -1,5 +1,6 @@
 #include <avr/pgmspace.h>
 
+
 byte bootMode = 0; //0=normal 1=tones&sync 4=beat&sync
 byte mask = B00000010;
 /*
@@ -58,6 +59,9 @@ byte beatSeqSelex = 0;
 unsigned long dists = 0B00000000001000000100000001000001;
 
 struct bools {
+  bool sync: 1;
+  bool tonesMode: 1;
+  bool portBMode: 1;                        //flag whether we are in a mode that supports portb or not
   bool transpose: 1;
   bool allowBDSeqMod: 1;
   bool allowSDSeqMod: 1;
@@ -98,6 +102,9 @@ struct bools {
   bool BASS: 1;
   bool MELODY: 1;
 } bools = {
+  .sync = false,  //false = internal sync , true = external sync
+  .tonesMode = true,
+  .portBMode = true,                                  //flag whether we are in a mode that supports portb or not
   .transpose = true,
   .allowBDSeqMod = true,
   .allowSDSeqMod = true,
@@ -260,6 +267,7 @@ byte TunePtr = 0, Chan = 0;
 void setup() {
 
 
+  //DDRB = B00010010;
   pinMode(tonepin, OUTPUT);
   pinMode(portBpin, OUTPUT);
   pinMode(SW1, INPUT_PULLUP);
@@ -267,39 +275,73 @@ void setup() {
   pinMode(LDRpin, INPUT_PULLUP);
 
 
-//BOOTMODE
+
+  ///BOOTMODE///
   if (!digitalRead(SW1) && !digitalRead(SW2)) { // if both buttons are pushed upon boot
     while (bootMode == 0) {                    //check witch one is released first to decide sync mode  //0=normal 1=tones&sync 4=beat&sync
       if (digitalRead(SW1)) {
+        bools.portBMode = false;
+        bools.tonesMode = true;
         bootMode = 1;
         mask = B00000000; // if we are in tones and sync mode, we dont want to let portBs out of the portBpin!
       } else if (digitalRead(SW2)) {
+        bools.portBMode = true;
+        bools.tonesMode = false;
         bootMode = 4;
         mask = B00000010;
       }
     }
   } else if (!digitalRead(SW1)) {             //only SW1 means mode 10
     bootMode = 10;
+    bools.portBMode = true;
+    bools.tonesMode = true;
+    while (!digitalRead(SW1)) {
+      if (!digitalRead(SW2)) {                //SW1 + SW2 means mode 30, sync in on portBpin and tones out
+        bootMode = 30;  //bootmode 30 is listen to sync and play tones
+        pinMode(portBpin, INPUT);
+        attachInterrupt(digitalPinToInterrupt(portBpin), notePlayer , RISING ); // might need pinToInterrupt(portBpin)
+        bools.portBMode = false;
+      }
+    }
+
   } else if (!digitalRead(SW2)) {             //only SW2 means mode 20
     bootMode = 20;
+    bools.portBMode = true;
+    bools.tonesMode = true;
+    while (!digitalRead(SW2)) {
+      bootMode = 40;                          //switch2 + 1 means bootMode 40, listen to sync on tones pin and play portB
+      pinMode(tonepin, INPUT);
+      attachInterrupt(digitalPinToInterrupt(tonepin), notePlayer , RISING ); // might need pinToInterrupt(portBpin)
+      bools.tonesMode = false;
+    }
   } else {
-    //bootMode = 1;   //already defined as 0
+
+    ///////////////////////TEST////////////
+      bootMode = 40;                          //switch2 + 1 means bootMode 40, listen to sync on tones pin and play portB
+      pinMode(tonepin, INPUT);
+      attachInterrupt(digitalPinToInterrupt(tonepin), notePlayer , RISING ); // might need pinToInterrupt(portBpin)
+      bools.tonesMode = false;    //bootMode already defined as 0
+    //////////////////////END TEST////////
+    //     bootMode = 30;  //bootmode 30 is listen to sync and play tones
+    //     pinMode(portBpin, INPUT);
+    //     attachInterrupt(digitalPinToInterrupt(portBpin), notePlayer , RISING ); // might need pinToInterrupt(portBpin)
   }
 
+
+
+
   int randSeed = (analogRead(LDR));
-  //digitalWrite(LED, HIGH);
+  digitalWrite(portBpin, HIGH); //turn on a light to get reflection info to use as second part of randseed
   delay(200);
 
-  //digitalWrite(LED, LOW);   
-  //delay(400);
   randSeed = randSeed + (analogRead(LDR)) + birthdate;
-
+  digitalWrite(portBpin, LOW);
   randomSeed(randSeed);
   //randomSeed(100);
   //refreshRandom();
   //gener8BD();
 
-  // Enable 64 MHz PLL and use as source for Timer1
+  //Enable 64 MHz PLL and use as source for Timer1
   //PLLCSR = 1 << PCKE | 1 << PLLE;                                                       //can remove
 
   // Set up Timer/Counter1 for PWM output
@@ -364,6 +406,3 @@ ISR(TIMER0_COMPA_vect) {
   generatePolyTones();
   s++;
 }
-
-
-

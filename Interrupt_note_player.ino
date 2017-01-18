@@ -1,7 +1,18 @@
 //pin 1 is portB and pin 4 is tones
+//ISR(INT1){                      //not how to do it, used arduino
+//if (digitalRead(syncPin)){     //check if this was the rising edge (do i need to debounce this?
+// notePlayer();
+//}
+//}
 
 // Watchdog interrupt plays notes
+
 ISR(WDT_vect) {  //interupt triggered by watchdog timer
+  if(!bools.sync){
+  notePlayer();
+  }
+}
+void notePlayer() {
   if (bootMode != 0) {
     digitalWrite(bootMode, (selex + 1) % 2);
   }
@@ -74,10 +85,10 @@ void playNextNote() {
     for (int Note = 0; Note < 32; Note++) {                         //step through each bit of the 32bit number
       oct = 0;
       if (bitRead(Chords[(selex) % barLength], Note)) {
-        int freqSelector = ((Note * -1) + 31 - (modulationinterval * (barTicker % 3))*bools.transpose);
-                            Freq[Chan] = (pgm_read_word_near(Scale + freqSelector)) >> oct ;//Scale[freqSelector] >> oct;          //look up the notes frequency and shift the octave as per the array
-                            Amp[Chan] = 1 + (bitRead(dists, selex)) << (Decay + 5);                       // change to 2 for epic dist
-                            Chan = (Chan + 1) % (Channels - 1);
+        int freqSelector = ((Note * -1) + 31 - (modulationinterval * (barTicker % 3)) * bools.transpose);
+        Freq[Chan] = (pgm_read_word_near(Scale + freqSelector)) >> oct ;//Scale[freqSelector] >> oct;          //look up the notes frequency and shift the octave as per the array
+        Amp[Chan] = 1 + (bitRead(dists, selex)) << (Decay + 5);                       // change to 2 for epic dist
+        Chan = (Chan + 1) % (Channels - 1);
       }
     }
   }

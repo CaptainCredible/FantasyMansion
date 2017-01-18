@@ -7,34 +7,28 @@
 
 // Watchdog interrupt plays notes
 
-ISR(WDT_vect) {  //interupt triggered by watchdog timer
-  if(!bools.sync){
-  notePlayer();
+ISR(WDT_vect) {  //interupt triggered by watchdog INTERUPT SHOULD BE DISABLED IF WE ARE IN SLAVE MODE!
+  if (!bools.receiveSync) {
+    periodTimer = 0;
+    notePlayer();
   }
 }
 void notePlayer() {
-  if (bootMode != 0) {
-    digitalWrite(bootMode, (selex + 1) % 2);
+  if (bools.sendSync) {
+    digitalWrite(syncPin, (selex + 1) % 2);
   }
 
   if (bools.play) {                                                      //if we "flag play"
-
     playNextNote();                                                      //play the next stored note
     t = 1;
     s = 4;
   }
 
-  //if(bools.slolo){                                                      //if its a slolo    SLOLO ISNT USED
-  //chordSolo(x);                                                   //slolo bitch
-  //}
-
-  //  if (bools.Blink) {
-  //    bools.blinkTicker = !bools.blinkTicker;
-  //  }
-
 }
 
 void playNextNote() {
+
+////////////////////////WRITING NOTES AND DRUMS///////////////////////////////
   if (bools.writeNote) {
     int EXX = (x * -1) + 600;                    //EXX is remapped x
     EXX = EXX / 10;
@@ -53,13 +47,10 @@ void playNextNote() {
     byte beatSeqSelexLookahead = (beatSeqSelex - 1) % 16; //make a lookahead number
 
     if (x < 300) {                                         //BD because it is pullup this is actually darkness
-      //digitalWrite(LED,HIGH);                              //why ?
       bitSet(BDseq, beatSeqSelexLookahead);                //set next step to BD
     } else if (x < 400) { //SD
       bitSet(HHseq, beatSeqSelexLookahead);                //set next step to HH
-
     } else {
-      //    digitalWrite(LED,LOW);
       bitSet(SDseq, beatSeqSelexLookahead);                //set next step to SD
     }
   }
@@ -77,11 +68,11 @@ void playNextNote() {
   Tempo = baseTempo + bools.slowMo;                                    //half the tempo on every other bar
   WDTCR = 1 << WDIE | Tempo << WDP0; // 4 Hz interrupt
   sei();                                                          // Allow interrupts
-  WDTCR |= 1 << WDIE;                                             //no idea what this is
+  WDTCR |= 1 << WDIE;                                             //no idea what this is, is this the 
 
 
   ///////CHORDSPLAY///////
-  if (bools.MELODY && bootMode != 4) {
+  if (bools.MELODY && syncPin!= 4) {//   if melodies are allowed 
     for (int Note = 0; Note < 32; Note++) {                         //step through each bit of the 32bit number
       oct = 0;
       if (bitRead(Chords[(selex) % barLength], Note)) {
@@ -94,7 +85,7 @@ void playNextNote() {
   }
 
   ////////BASSPLAY////////
-  if (bools.BASS && bootMode != 4) {
+  if (bools.BASS && syncPin != 4) {
     for (int Note = 0; Note < 32; Note++) {                         //step through each bit of the 16bit number
       if (bitRead(ChordsB[(selex) % barLength], Note)) {
         int freqSelector = ((Note * -1) + 15) - modulationinterval * (barTicker % 3);
@@ -145,19 +136,4 @@ void playNextNote() {
   t = 0;                                                         //set portBt back to 0 so portBs are audible
 
 }
-/*
-  void handleSyncOut() {
-  if (bootMode == 1) {
-    //delay(100000000);
-    if ((selex-1) % 4 == 0) {
-      if (t < portBlength && bools.portBticker) {
-        PORTB = (PORTB & B11111101) | B00000010;
-        t++;
-      } else {
-        PORTB = (PORTB & B11111101) | B00000000;
-      }
-    }
-  }
-  }
-*/
 

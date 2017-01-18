@@ -1,5 +1,5 @@
 void portB() {
-  if (!bools.disablePortB && bools.portBMode) {
+  if (!bools.disablePortB) {
 
 t=s>>mood;
 

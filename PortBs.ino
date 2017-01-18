@@ -1,13 +1,13 @@
-void playPortBsamp(int i) {
+void playPortBsamp(int i, byte selector) {
 
   //PORTB = (PORTB & ~mask) | (OutPut(i) & mask); //MASK THE PINS WE WANT TO WRITE TO
-int OUT = OutPut(i);
+int OUT = OutPut(i,selector);
 PORTB = (PORTB & ~mask) | (OUT & mask);//mask);
 // delay(1);
 }
 
 
-byte OutPut(long i) {
+byte OutPut(long i, byte selector) {
   switch (selector) {
 
     case 1:

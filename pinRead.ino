@@ -17,6 +17,24 @@ void pinRead() {
   byte pinState = PINB;
   bools.leftSwitch = !bitRead(pinState, 0); // "Obey"
   bools.rightSwitch = !bitRead(pinState, 3); // "Purify + eyeWhite
+
+  //SYNC RECEIVE
+  if (bools.receiveSync) {
+    
+    bool inSignal = (digitalRead(syncPin));
+    if (inSignal && !bools.oldInSignal) {
+      syncPeriod = periodTimer >> 1;
+      notePlayer();
+      bools.oldInSignal = true;
+      
+    }
+    if (!inSignal && periodTimer > syncPeriod && bools.oldInSignal == true){
+      if(bools.doubleTime){
+      notePlayer();
+      }
+      bools.oldInSignal = false;
+    }
+  }
 }
 
 void BANGdetectors() {
@@ -65,7 +83,6 @@ void modeHandle() {
       bools.play = false;
       bools.bend = false;
       t = 0;
-      bools.Blink = false;
       bools.firstRun = true;
       bools.myFirstSongMode = false;
       bools.writeNote = false;
@@ -81,7 +98,7 @@ void modeHandle() {
     PORTB = (PORTB & ~mask) | ((t * (t >> x) >> (t >> 4)) & mask);
     t++;
 
-   playNoteNow(random(0, 2000), 0, 1);
+    playNoteNow(random(0, 2000), 0, 1);
 
 
 

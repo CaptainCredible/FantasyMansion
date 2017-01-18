@@ -1,7 +1,7 @@
 #include <avr/pgmspace.h>
 
 
-byte bootMode = 0; //0=normal 1=tones&sync 4=beat&sync
+byte syncPin = 0; //0=normal 1=tones&sync 4=beat&sync
 byte mask = B00000010;
 /*
     TO DO
@@ -28,6 +28,10 @@ byte mode = 10;
 #define tonepin 4
 #define portBpin 1
 
+unsigned long oldSyncPulseTime = 0;
+unsigned long syncPeriod = 1;
+unsigned long periodTimer = 10000000;
+
 int portBlength = 200;
 
 byte playMode = 0;
@@ -47,7 +51,7 @@ byte scalesOffset = 0;
 
 int barTicker = 1;
 //int scalesOffset = 10;   was used to select from premade scales, new code will generate scales on the fly ?
-byte selector = 1;//random(1, 17);
+//byte selector = 1;//random(1, 17);
 byte partTicker = 1;
 byte songTicker = 1;
 byte modulationinterval = 2;
@@ -59,7 +63,11 @@ byte beatSeqSelex = 0;
 unsigned long dists = 0B00000000001000000100000001000001;
 
 struct bools {
-  bool sync: 1;
+  bool doubleTime: 1;
+  bool oldInSignal: 1;
+  bool syncTick: 1;
+  bool sendSync: 1;
+  bool receiveSync: 1;
   bool tonesMode: 1;
   bool portBMode: 1;                        //flag whether we are in a mode that supports portb or not
   bool transpose: 1;
@@ -70,21 +78,15 @@ struct bools {
   bool rightSwitch: 1;
   bool slowMo: 1;
   bool portBticker: 1;
-  bool tickerFlag: 1;
-  bool dist: 1;                              //not used (replaced by dists[]
   bool oldLeftSwitch: 1;
   bool oldRightSwitch: 1;
   bool play: 1;
-  bool slolo: 1;                             //not used
-  bool Blink: 1;
-  bool blinkTicker: 1;
   bool doubleButt: 1;     //to make sure it only runs the doublebutt code once
   bool bend: 1;
   bool disablePortB: 1;
   bool firstRun: 1;
   bool myFirstSongMode: 1;
   bool myFirstBeatMode: 1;
-  bool plex: 1;
   bool writeNote: 1;
   bool eraseNote: 1;
   bool noteWritten: 1;                 //not used
@@ -102,7 +104,11 @@ struct bools {
   bool BASS: 1;
   bool MELODY: 1;
 } bools = {
-  .sync = false,  //false = internal sync , true = external sync
+  .doubleTime = true,
+  .oldInSignal = true,
+  .syncTick = false,
+  .sendSync = false,
+  .receiveSync = false,  //false = internal sync , true = external sync
   .tonesMode = true,
   .portBMode = true,                                  //flag whether we are in a mode that supports portb or not
   .transpose = true,
@@ -113,21 +119,15 @@ struct bools {
   .rightSwitch = false,
   .slowMo = false,
   .portBticker = true,
-  .tickerFlag = true,
-  .dist = false,
   .oldLeftSwitch = false,
   .oldRightSwitch = false,
   .play = false,
-  .slolo = false,
-  .Blink = false,
-  .blinkTicker = false,
   .doubleButt = false,
   .bend = false,
   .disablePortB = false,
   .firstRun = true,
   .myFirstSongMode = false,
   .myFirstBeatMode = false,
-  .plex = false,
   .writeNote = false,
   .eraseNote = false,
   .noteWritten = false,
@@ -184,7 +184,7 @@ byte scaleSelect = 0;
 
 //can be moved to progmem
 byte currentScale[30] {
-  33, 31, 28, 24, 19, 16, 12, 7, 4, 0, // CMinor    MAKE THESE STRICTER TO FIt THE CHORDS??
+  33, 31, 28, 24, 19, 16, 12, 7, 4, 0, // CMinor    MAKE THESE STRICTER TO fit THE CHORDS??
   0, 1, 5, 8, 12, 13, 17, 20, 24, 29, // CMAJOR
   0, 2, 4, 7, 9, 12, 14, 16, 19, 22 //penta
 };
@@ -276,55 +276,62 @@ void setup() {
 
 
 
-  ///BOOTMODE///
+  ///BOOTMODES///
   if (!digitalRead(SW1) && !digitalRead(SW2)) { // if both buttons are pushed upon boot
-    while (bootMode == 0) {                    //check witch one is released first to decide sync mode  //0=normal 1=tones&sync 4=beat&sync
-      if (digitalRead(SW1)) {
+    while (syncPin == 0) {                    //check witch one is released first to decide sync mode  //0=normal 1=tones&sync 4=beat&sync
+
+      if (digitalRead(SW1)) {                 // TONES OUT AND SYNC OUT /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
         bools.portBMode = false;
         bools.tonesMode = true;
-        bootMode = 1;
-        mask = B00000000; // if we are in tones and sync mode, we dont want to let portBs out of the portBpin!
-      } else if (digitalRead(SW2)) {
+        syncPin = 1;
+        mask = B00000000; // if we are in tones and sync mode, we dont want to let portBs out of the portBpin! ALL PORTB GENERATORS SHOULD BE MUTED
+
+      } else if (digitalRead(SW2)) {          // PORTB OUT AND SYNC OUT /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
         bools.portBMode = true;
-        bools.tonesMode = false;
-        bootMode = 4;
+        bools.tonesMode = false;  //GENERATE POLY TONES SHOULD BE MUTED!!!!
+        syncPin = 4;
         mask = B00000010;
       }
     }
-  } else if (!digitalRead(SW1)) {             //only SW1 means mode 10
-    bootMode = 10;
+  } else if (!digitalRead(SW1)) {             //only SW1 means mode 10  START RIGHT IN TONES WRITING MODE PERHAPS? ////////////////////////////////////////////////////////////////////////////////
+    syncPin = 100;
     bools.portBMode = true;
     bools.tonesMode = true;
     while (!digitalRead(SW1)) {
-      if (!digitalRead(SW2)) {                //SW1 + SW2 means mode 30, sync in on portBpin and tones out
-        bootMode = 30;  //bootmode 30 is listen to sync and play tones
+
+
+      if (!digitalRead(SW2)) {                //SW1 + SW2 means mode 10, SYNCIN ON PORTBPIN!!! ////////////////////////////////////////////////////////////////////////////////////////////////////
+        syncPin = 1;  //syncPin 30 is listen to sync and play tones
         pinMode(portBpin, INPUT);
-        attachInterrupt(digitalPinToInterrupt(portBpin), notePlayer , RISING ); // might need pinToInterrupt(portBpin)
+        bools.receiveSync = true;
         bools.portBMode = false;
+        bools.tonesMode = true;
       }
     }
 
-  } else if (!digitalRead(SW2)) {             //only SW2 means mode 20
-    bootMode = 20;
+  } else if (!digitalRead(SW2)) {             //only SW2 means mode 20 start right on beats prog pergaps? /////////////////////////////////////////////////////////////////////////////////////////
+    syncPin = 100;
     bools.portBMode = true;
     bools.tonesMode = true;
     while (!digitalRead(SW2)) {
-      bootMode = 40;                          //switch2 + 1 means bootMode 40, listen to sync on tones pin and play portB
-      pinMode(tonepin, INPUT);
-      attachInterrupt(digitalPinToInterrupt(tonepin), notePlayer , RISING ); // might need pinToInterrupt(portBpin)
-      bools.tonesMode = false;
+      if (!digitalRead(SW1)) {
+        syncPin = 4;                          //switch2 + 1 means syncPin 40, listen to sync on tones pin and play portB ///////////////////////////////////////////////////////////////////////////
+        pinMode(tonepin, INPUT);
+        bools.receiveSync = true;
+        bools.tonesMode = false;
+        bools.portBMode = true;
+      }
     }
   } else {
-
-    ///////////////////////TEST////////////
-      bootMode = 40;                          //switch2 + 1 means bootMode 40, listen to sync on tones pin and play portB
-      pinMode(tonepin, INPUT);
-      attachInterrupt(digitalPinToInterrupt(tonepin), notePlayer , RISING ); // might need pinToInterrupt(portBpin)
-      bools.tonesMode = false;    //bootMode already defined as 0
-    //////////////////////END TEST////////
-    //     bootMode = 30;  //bootmode 30 is listen to sync and play tones
-    //     pinMode(portBpin, INPUT);
-    //     attachInterrupt(digitalPinToInterrupt(portBpin), notePlayer , RISING ); // might need pinToInterrupt(portBpin)
+    //TESTZONE///
+        syncPin = 1;  //syncPin 30 is listen to sync and play tones
+        pinMode(portBpin, INPUT);
+        bools.receiveSync = true;
+        bools.portBMode = false;
+        bools.tonesMode = true;
+    //TESTZONE///
   }
 
 
@@ -340,10 +347,8 @@ void setup() {
   //randomSeed(100);
   //refreshRandom();
   //gener8BD();
-
   //Enable 64 MHz PLL and use as source for Timer1
   //PLLCSR = 1 << PCKE | 1 << PLLE;                                                       //can remove
-
   // Set up Timer/Counter1 for PWM output
   TIMSK = 0;                     // Timer interrupts OFF
   TCCR1 = 1 << CS10;             // 1:1 prescale
@@ -361,8 +366,7 @@ void setup() {
   // Set up Watchdog timer for 4 Hz interrupt for note output.
   WDTCR = 1 << WDIE | Tempo << WDP0; // 4 Hz interrupt
 
-  //generate beats and melodies
-  gener8BDbeat();
+  //generate beats and melodie  gener8BDbeat();
   gener8SDbeat();
   gener8hats();
   //gener8Melody();
@@ -371,8 +375,13 @@ void setup() {
 
 
 void loop() {
-  portB();
+  if (bools.portBMode) {
+    portB();
+  }
   pinRead();          //check the states of the pins
+  if (bools.receiveSync) {
+
+  }
   BANGdetectors();
   modeHandle();       //cycle throuth the modes when necessary
   xManip(xMode);   // manipulate x value : 1=insanepitchrange 2=megapitchrange 0 = donothing
@@ -380,29 +389,14 @@ void loop() {
     bender = 0;
   }
   modeSelect();
-
-  //ticker code
-  /*
-    if ( ((barTicker % 2) == 0) && bools.tickerFlag) {    //onetime code here!!!  THESE PREMISES SEEM WEIRD
-      bools.tickerFlag = false;
-
-      //if (random(0, 3) == 0) {                                // randomicate it maybe make this happen on every iteration of barticker?       // shorten barLength if its half time
-      //}
-
-    } else if ((barTicker % 2 ) && !bools.tickerFlag) { //onetime off code here
-      bools.tickerFlag = true;
-    }
-    //gener8Melody();
-    //barTicker = 0;
-    //if (millis()-timer < 100){
-    // solo(x);
-    //}
-  */
 }
 
 
 
 ISR(TIMER0_COMPA_vect) {
-  generatePolyTones();
+  if (bools.tonesMode) {
+    generatePolyTones();
+  }
   s++;
+  periodTimer++;
 }

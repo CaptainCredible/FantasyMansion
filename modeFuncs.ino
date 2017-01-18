@@ -7,8 +7,8 @@ void musicbox() {
   if (bools.leftSwitch) {    //if left button is in
     //gener8SDbeat();
     Decay = 4;
-    
-    playPortBsamp(t);
+
+    playPortBsamp(t, melodyOffset);
     t++;
 
   } else if (bools.rightSwitch) { //    If right button is in
@@ -29,7 +29,7 @@ void musicbox() {
       if (!bools.ownBeat) {
         newDrums();
       }
-      selector = random(1, 17);
+      //      selector = random(1, 17);
       bools.disablePortB = !bools.disablePortB;
     }
 
@@ -41,7 +41,7 @@ void musicbox() {
       } else if (playMode % 3 == 1) {
         bools.MELODY = true;
         bools.BASS = false;
-      }else{
+      } else {
         bools.MELODY = false;
         bools.BASS = true;
       }
@@ -57,7 +57,6 @@ void trigOnChangeSolo() {
     bools.ownBeat = false;
     bools.firstRun = false;
   }
-  bools.Blink = false;
   bools.play = false;
   //digitalWrite(LED, LOW);
   xMode = 0;
@@ -68,11 +67,13 @@ void trigOnChangeSolo() {
 
   }
   if (bools.leftSwitch) {
-    PORTB = (PORTB & ~mask) | (t % ((t >> x) & (t >> 5))) & mask ;
+    playPortBsamp(t, melodyOffset);
+    //PORTB = (PORTB & ~mask) | (t % ((t >> x) & (t >> 5))) & mask ;
     t++;
   }
   if (bools.rightSwitch) {
-    PORTB = (PORTB & ~mask) | (((t * (t >> 4 | t >> 9) | (t / 256 + x)&t >> 8)) ^ (t & t >> 8 | t >> 6)) & mask;
+    playPortBsamp(t, melodyOffset);
+    //PORTB = (PORTB & ~mask) | (((t * (t >> 4 | t >> 9) | (t / 256 + x)&t >> 8)) ^ (t & t >> 8 | t >> 6)) & mask;
     t++;
     if (bools.BANG_R) {
       octaveselect++;
@@ -89,7 +90,7 @@ void trigOnChangeSolo() {
 
 
 void trigOnPurifySolo() {
-  bools.Blink = false;
+  //}/*
   bools.play = false;
   if (bools.BANG_R) {
     chordSolo(x);
@@ -98,16 +99,17 @@ void trigOnPurifySolo() {
     chordSolo(x + 10);
   }
 }
+//*/
 
 
 void buttonSolos() {
   bools.play = false;
-  bools.Blink = false;
+
   if (bools.rightSwitch) {
     xMode = 0;
     a = x / 10;
 
-    playPortBsamp(t);
+    playPortBsamp(t, melodyOffset);
     t++;
   } else if (bools.leftSwitch) {
     xMode = 1;
@@ -124,12 +126,11 @@ void buttonSolos() {
 
 void portBplayer() {
   if (bools.rightSwitch) {
-    bools.Blink = false;
     a = x / 10;
     bools.bend = true;
 
 
-    playPortBsamp(t);
+    playPortBsamp(t, melodyOffset); //using melody offset so i dont need to store an own portB
     t++;
   } else if (bools.leftSwitch) {
     refreshRandom();
@@ -204,9 +205,9 @@ void test() {
     // bools.myFirstBeatMode = true;
     // clearMelody();
     bools.play = true;
-   // gener8BDbeat();
-   // gener8SDbeat();
-   // gener8hats();
+    // gener8BDbeat();
+    // gener8SDbeat();
+    // gener8hats();
 
     generateChords();
     // melodyTEST();
@@ -215,7 +216,7 @@ void test() {
     HHseq = 0b0000000000100000;
     bools.firstRun = false;
   }
-//s++;
-//playPortBsamp(s);
+  //s++;
+  //playPortBsamp(s);
 }
 

@@ -20,19 +20,20 @@ void pinRead() {
 
   //SYNC RECEIVE
   if (bools.receiveSync) {
-    
-    bool inSignal = (digitalRead(syncPin));
-    if (inSignal && !bools.oldInSignal) {
-      syncPeriod = periodTimer >> 1;
-      notePlayer();
-      bools.oldInSignal = true;
-      
-    }
-    if (!inSignal && periodTimer > syncPeriod && bools.oldInSignal == true){
-      if(bools.doubleTime){
-      notePlayer();
+    bools.inSignal = (digitalRead(syncPin));
+
+    if (bools.inSignal && !bools.oldInSignal) { //if the sync pin is HIGH and it was flagged as LOW
+      bools.oldInSignal = true;                 //flag that we have detected the signal going high so now we need to wait for it to go low
+      syncPeriod = periodTimer >> 1;            //set the syncPeriod to be half og how far we have counted with the periodTimer             I THINK PERIODTIMER NEEDS TO BE VOLATILE!!!!!
+      periodTimer = 0;                          //now reset the periodTimer
+      notePlayer();                           //play A Note
+    } else if (bools.oldInSignal && periodTimer > syncPeriod) { //if either the inSignal isn't high, or if we have allready done whats necessary to do when it went high, check if periodTimer has exeeded what we counted foir last time and make sure we didnt allready do that
+      bools.oldInSignal = false;                //flag that we have detected the state where the offbeat note should be triggered by writing oldInSignal to false
+
+      if (bools.doubleTime) {
+        notePlayer();                             //play a note
+        //optionaly make doubleTime selectable
       }
-      bools.oldInSignal = false;
     }
   }
 }

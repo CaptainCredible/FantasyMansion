@@ -1,18 +1,13 @@
-//pin 1 is portB and pin 4 is tones
-//ISR(INT1){                      //not how to do it, used arduino
-//if (digitalRead(syncPin)){     //check if this was the rising edge (do i need to debounce this?
-// notePlayer();
-//}
-//}
+
 
 // Watchdog interrupt plays notes
 
 ISR(WDT_vect) {  //interupt triggered by watchdog INTERUPT SHOULD BE DISABLED IF WE ARE IN SLAVE MODE!
   if (!bools.receiveSync) {
-    periodTimer = 0;
     notePlayer();
   }
 }
+
 void notePlayer() {
   if (bools.sendSync) {
     digitalWrite(syncPin, (selex + 1) % 2);
@@ -28,7 +23,7 @@ void notePlayer() {
 
 void playNextNote() {
 
-////////////////////////WRITING NOTES AND DRUMS///////////////////////////////
+  ////////////////////////WRITING NOTES AND DRUMS///////////////////////////////
   if (bools.writeNote) {
     int EXX = (x * -1) + 600;                    //EXX is remapped x
     EXX = EXX / 10;
@@ -68,17 +63,23 @@ void playNextNote() {
   Tempo = baseTempo + bools.slowMo;                                    //half the tempo on every other bar
   WDTCR = 1 << WDIE | Tempo << WDP0; // 4 Hz interrupt
   sei();                                                          // Allow interrupts
-  WDTCR |= 1 << WDIE;                                             //no idea what this is, is this the 
+  WDTCR |= 1 << WDIE;                                             //no idea what this is, is this the
 
 
   ///////CHORDSPLAY///////
-  if (bools.MELODY && syncPin!= 4) {//   if melodies are allowed 
+  if (bools.MELODY && syncPin != 4) { //   if melodies are allowed
     for (int Note = 0; Note < 32; Note++) {                         //step through each bit of the 32bit number
       oct = 0;
       if (bitRead(Chords[(selex) % barLength], Note)) {
         int freqSelector = ((Note * -1) + 31 - (modulationinterval * (barTicker % 3)) * bools.transpose);
+        if (freqSelector > 32)
+        {
+          freqSelector = freqSelector - 12;
+        } else if (freqSelector < 0){
+          freqSelector = freqSelector + 12;
+        }
         Freq[Chan] = (pgm_read_word_near(Scale + freqSelector)) >> oct ;//Scale[freqSelector] >> oct;          //look up the notes frequency and shift the octave as per the array
-        Amp[Chan] = 1 + (bitRead(dists, selex)) << (Decay + 5);                       // change to 2 for epic dist
+        Amp[Chan] = (1 + (bitRead(dists, selex))) << (decays[selex % 16] + 6);                       // change to 2 for epic dist
         Chan = (Chan + 1) % (Channels - 1);
       }
     }
@@ -90,7 +91,7 @@ void playNextNote() {
       if (bitRead(ChordsB[(selex) % barLength], Note)) {
         int freqSelector = ((Note * -1) + 15) - modulationinterval * (barTicker % 3);
         Freq[Chan] = pgm_read_word_near(Scale + freqSelector) >> 2;                //look up the notes frequency and shift the octave as per the array
-        Amp[Chan] = 3 + (bitRead(dists, selex)) << (decays[selex % 16] + 6);                     // change to 2 for epic dist
+        Amp[Chan] = 2 + (bitRead(dists, selex)) << (decays[selex % 16] + 6);                     // change to 2 for epic dist
         Chan = (Chan + 1) % (Channels - 1);
       }
     }

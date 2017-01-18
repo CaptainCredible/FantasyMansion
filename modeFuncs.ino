@@ -196,14 +196,14 @@ void myFirstBeat() {
 
 void test() {
   if (bools.firstRun) {
-    clearDrums();
+    //clearDrums();
     bools.ownBeat = true;
     bools.allowBDSeqMod = false;
     bools.allowHHSeqMod = false;
     bools.allowSDSeqMod = false;
     bools.allowTranspose = true;
     // bools.myFirstBeatMode = true;
-    // clearMelody();
+    clearMelody();
     bools.play = true;
     // gener8BDbeat();
     // gener8SDbeat();
@@ -215,8 +215,9 @@ void test() {
     SDseq = 0b0001001000000011;
     HHseq = 0b0000000000100000;
     bools.firstRun = false;
+    bools.BASS = true;
+    bools.MELODY = true;
   }
-  //s++;
-  //playPortBsamp(s);
+
 }
 

@@ -14,7 +14,7 @@ void melodyTEST() {
 
 ////////////////////////////////////////////////////////////////////////////////////
 void clearMelody() {
-  for (int i = 0; i < 16; i++) {        //step through sequence oc "chords"
+  for (int i = 0; i < barLength; i++) {        //step through sequence oc "chords"
     Chords[i] = 0; //clear melody       //delete chord
   }
 }

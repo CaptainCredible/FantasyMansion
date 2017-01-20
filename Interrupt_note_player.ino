@@ -72,8 +72,8 @@ bools.slowMo = !(selex%2);
 
   ///////CHORDSPLAY///////
   if (bools.MELODY && syncPin != 4) { //   if melodies are allowed
+
     for (int Note = 0; Note < 32; Note++) {                         //step through each bit of the 32bit number
-      //oct = 0;
       if (bitRead(Chords[(selex) % barLength], Note)) {
         int freqSelector = ((Note * -1) + 31 - (modulationinterval * (barTicker % 3)) * bools.transpose);
         if (freqSelector > 32)

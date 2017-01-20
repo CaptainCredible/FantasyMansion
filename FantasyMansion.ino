@@ -28,15 +28,17 @@ byte mode = 10;
 #define tonepin 4
 #define portBpin 1
 
+byte modulationSteps = 3;
+int portBlength = 500;
+byte playMode = 0; //BOTH, BASS, MELODY
+byte octaveselect = 0;
+
 unsigned long oldSyncPulseTime = 0;
 unsigned long syncPeriod = 1;
 unsigned int periodTimer = 10;
 
-int portBlength = 200;
 
-byte playMode = 0;
-byte octaveselect = 0;
-byte oct;
+//byte oct;
 int x = 0; //ldr value 0-600
 byte diff = 0;
 byte xMode = 0;
@@ -63,6 +65,7 @@ byte beatSeqSelex = 0;
 
 
 struct bools {
+  bool swing: 1;
   bool inSignal: 1;
   bool doubleTime: 1;
   bool oldInSignal: 1;
@@ -105,6 +108,7 @@ struct bools {
   bool BASS: 1;
   bool MELODY: 1;
 } bools = {
+  .swing = false,
   .inSignal = false,
   .doubleTime = true,
   .oldInSignal = true,
@@ -156,7 +160,7 @@ byte b = random(1, 20);
 byte c = random(5, 31);
 
 unsigned int BDseq =   0b1000000010000000;
-unsigned int SDseq =   0b0101100000001000;
+unsigned int SDseq =   0b1111111111111111;
 unsigned int HHseq =   0b0000000000000000;
 //byte modsSeq[16] = {3,3,3,3,3,3,3,3,5,5,4,4,4,3,4,3};//0b1111000010000000;
 int mood = 3; //how fast the t increases
@@ -254,6 +258,7 @@ byte decays[16] {5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5};               
 unsigned long dists = 0B00000000000000000000000000000000;
 //byte octArray[16] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
 byte octArray = 0B0000000000000000;
+byte root = 12;
 
 
 unsigned int ChordsB[32] = {
@@ -264,18 +269,18 @@ unsigned int ChordsB[32] = {
   0B0000000000000000,
   0B0000000000000000,
   0B0000000000001000,
-  0B0000000000001000,
-  0B0000000000001000,
-  0B0000000000001000,
-  0B0000000000001000,
-  0B0000000000001000,
-  0B0000000000001000,
+  0B0000000000000000,
+  0B0000000000000000,
+  0B0000000000000000,
+  0B0000000000000000,
+  0B0000000000000000,
+  0B0000000000000000,
   0B0000000000000000,
   0B0000000000000000,
   0B0000000000000000,
   0B0000000100000000,
   0B0000000000000000,
-  0B0000000100000000,
+  0B0000000000000000,
   0B0000000000000000,
   0B0000000100000000,
   0B0000000000000000,
@@ -325,15 +330,18 @@ void setup() {
 
         bools.portBMode = false;
         bools.tonesMode = true;
+        bools.sendSync = true;
         syncPin = 1;
         mask = B00000000; // if we are in tones and sync mode, we dont want to let portBs out of the portBpin! ALL PORTB GENERATORS SHOULD BE MUTED
 
       } else if (digitalRead(SW2)) {          // PORTB OUT AND SYNC OUT /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
         bools.portBMode = true;
-        bools.tonesMode = false;  //GENERATE POLY TONES SHOULD BE MUTED!!!!
+        bools.tonesMode = false;
+        bools.sendSync = true;
         syncPin = 4;
         mask = B00000010;
+
       }
     }
   } else if (!digitalRead(SW1)) {             //only SW1 means mode 10  START RIGHT IN TONES WRITING MODE PERHAPS? ////////////////////////////////////////////////////////////////////////////////
@@ -366,12 +374,15 @@ void setup() {
       }
     }
   } else {
+
+    //bools.portBMode = true;
+    //bools.tonesMode = true;
     //TESTZONE///
-        syncPin = 1;  //syncPin 30 is listen to sync and play tones
-        pinMode(portBpin, INPUT);
-        bools.receiveSync = true;
-        bools.portBMode = false;
-        bools.tonesMode = true;
+    // bools.portBMode = true;
+    // bools.tonesMode = false;
+    // bools.sendSync = true;
+    // syncPin = 4;
+    // mask = B00000010;
     //TESTZONE///
   }
 
@@ -403,6 +414,7 @@ void setup() {
   TCCR0B = 1 << WGM02 | 2 << CS00; // 1/8 prescale
   OCR0A = 99;                    // Divide by 100
   TIMSK = 1 << OCIE0A;           // Enable compare match, disable overflow
+  OSCCAL += 2;
 
   // Set up Watchdog timer for 4 Hz interrupt for note output.
   WDTCR = 1 << WDIE | Tempo << WDP0; // 4 Hz interrupt
@@ -417,21 +429,22 @@ void setup() {
 
 void loop() {
   //if(periodTimer<syncPeriod){
-      //playNoteNow(periodTimer, octaveselect, 2);
-  //} 
-  
+  //playNoteNow(periodTimer, octaveselect, 2);
+  //}
+
   if (bools.portBMode) {
     portB();
   }
   pinRead();          //check the states of the pins
-  if (bools.receiveSync) {
-
-  }
   BANGdetectors();
   modeHandle();       //cycle throuth the modes when necessary
   xManip(xMode);   // manipulate x value : 1=insanepitchrange 2=megapitchrange 0 = donothing
   if (!bools.bend) {
     bender = 0;
+  }
+  if (bools.syncTick) {
+    digitalWrite(syncPin, !((selex + 1) % 2));
+    bools.syncTick = false;
   }
   modeSelect();
 }

@@ -45,7 +45,7 @@ void gener8Melody() {
 ///////////////////////////////////////////////////////////////////////////////////////
 //ADD NOTE RANDOMLY
 void addNote() {
-  bitSet(Chords[random(17)], currentScale[random(11) + scalesOffset]);
+  bitSet(Chords[random(barLength-1)], currentScale[random(11) + scalesOffset]);
 }
 
 
@@ -63,10 +63,8 @@ if (bitRead(Chords[steppo],i)){
   }
 }
 
-
-
-///////////////////////////////////////////////////////////////////////////////////////
-int generateOctaves() {
+/////////////////////////////////////////////////////////////////////////////////////// Throws a bunch of random octaves into the mix
+void generateOctaves() {    
   for (int i = 0; i < random(16); i++) {
 //    octArray[i] = random(0, 2);
 bitSet(octArray,random(16));
@@ -75,12 +73,18 @@ bitSet(octArray,random(16));
 
 
 
+
+
+
+
 //////////////////////////////////////////////////////////////////////////////////////
 void generateChords() {
-  int root = 12;
-  for (int i = 0; i < 16; i++) { //step through chords
+  //int root = 12;
+  byte tripChords = 3;random(0,8);
+  byte chordBeatOffset = 4;random(0,8);
+  for (int i = 0; i < barLength; i++) { //step through chords
     Chords[i] = 0;
-    if ((i + 2) % 4 == 0) {                 //on step 3-7-11 and so on
+    if ((i + chordBeatOffset) % tripChords == 0) {                 //on step 3-7-11 and so on tripchords chordBeatOffset
       for (byte chordStep = 0; chordStep < 3; chordStep++) {
         bitSet(Chords[i], root + chordIntevals[chordStep + (chordIntervalSelector * 3)]);
       }

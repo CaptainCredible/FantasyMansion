@@ -92,7 +92,7 @@ void modeHandle() {
       bools.beatWrite = false;
       bools.beatErase = false;
       distAmount = 0;
-      oct = 0;
+     // oct = 0;
 
     }
 

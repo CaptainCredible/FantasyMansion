@@ -201,7 +201,7 @@ void test() {
     bools.allowBDSeqMod = false;
     bools.allowHHSeqMod = false;
     bools.allowSDSeqMod = false;
-    bools.allowTranspose = true;
+    bools.allowTranspose = false;
     // bools.myFirstBeatMode = true;
     clearMelody();
     bools.play = true;
@@ -212,8 +212,8 @@ void test() {
     generateChords();
     // melodyTEST();
     BDseq = 0b1000100010001000;
-    SDseq = 0b0001001000000011;
-    HHseq = 0b0000000000100000;
+    SDseq = 0b0010001000100010;
+    HHseq = 0b0000000000010000;
     bools.firstRun = false;
     bools.BASS = true;
     bools.MELODY = true;

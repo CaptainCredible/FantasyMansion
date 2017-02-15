@@ -7,7 +7,7 @@ byte mask = B00000010;
     TO DO
     toggle AMP multiplier to turn dist on and off
     make it play arpeggios
-    make it switch to neart every 8 steps perhaps
+    make it switch to neart ??? every 8 steps perhaps
 
 */
 
@@ -184,14 +184,14 @@ const uint16_t PROGMEM Scale[32] = {
 };
 
 byte bassTempo = 4;
-byte scaleSelect = 0;
+byte scaleSelect = 0; //0 = minor    1 = major    2 = penta 
 
 
 //can be moved to progmem
-byte currentScale[30] {
-  33, 31, 28, 24, 19, 16, 12, 7, 4, 0, // CMinor    MAKE THESE STRICTER TO fit THE CHORDS??
-  0, 1, 5, 8, 12, 13, 17, 20, 24, 29, // CMAJOR
-  0, 2, 4, 7, 9, 12, 14, 16, 19, 22 //penta
+byte currentScale[15] {
+  0, 3, 7, 10, 12,//minor
+  0, 4, 7, 11, 12, //major
+  0, 2, 5, 7, 9 //pentatonic
 };
 
 byte chordIntervalSelector = 0; //0 Minor, 1 Major, 3 Power
@@ -301,9 +301,10 @@ unsigned int ChordsB[32] = {
 
 
 
-const uint8_t PROGMEM soloScales[20] {
-  0, 3, 7, 12, 15, 19, 24, 27, 31, 35, //minor
-  0, 4, 7, 12, 6,  19, 14, 24, 28, 31 //pentatonic
+const uint8_t PROGMEM soloScales[15] {
+  0, 3, 7, 10, 12,//minor
+  0, 4, 7, 11, 12, //major
+  0, 2, 5, 7, 9 //pentatonic
 };
 
 //Globals persist throughout tune

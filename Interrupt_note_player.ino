@@ -94,8 +94,8 @@ bools.slowMo = !(selex%2);
   if (bools.BASS && syncPin != 4) {
     for (int Note = 0; Note < 32; Note++) {                         //step through each bit of the 16bit number
       if (bitRead(ChordsB[(selex) % barLength], Note)) {
-        int freqSelector = ((Note * -1) + 15) - (modulationinterval * (barTicker % modulationSteps));
-        Freq[Chan] = pgm_read_word_near(Scale + freqSelector) >> 2;                //look up the notes frequency and shift the octave as per the array
+        int freqSelector = (((Note * -1) + 32) - (modulationinterval * (barTicker % modulationSteps)))-2;    // offset by 6 or 18
+        Freq[Chan] = pgm_read_word_near(Scale + freqSelector) >> 3;                //look up the notes frequency and shift the octave as per the array
         Amp[Chan] = 2 + (bitRead(dists, selex)) << (decays[selex % 16] + 6);                     // change to 2 for epic dist
         Chan = (Chan + 1) % (Channels - 1);
       }

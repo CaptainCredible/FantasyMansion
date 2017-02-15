@@ -25,7 +25,7 @@ byte OutPut(long i, byte selector) {
     //   return (i >> b + i << c);
     //   break;
 
-    case 4:
+    /* case 4:
       //long wank, Period = 16500
       return ((i * (i >> b | i >> 9) | (i / 256 + a)&i >> 8)) ^ (i & i >> c | i >> 6);
       break;

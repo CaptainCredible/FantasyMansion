@@ -28,7 +28,7 @@ void modeSelect() {
 
 
     case 7:
-      portBplayer();
+    trigOnPurifySolo();
       break;
 
     case 8:

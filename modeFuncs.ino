@@ -123,8 +123,8 @@ void buttonSolos() {
   }
 }
 
-
-void portBplayer() {
+/*
+  void portBplayer() {
   if (bools.rightSwitch) {
     a = x / 10;
     bools.bend = true;
@@ -141,8 +141,8 @@ void portBplayer() {
     octaveselect = random(0, 4);
     t = 0;
   }
-}
-
+  }
+*/
 
 void myFirstSong() {
   if (bools.firstRun) {
@@ -204,12 +204,19 @@ void test() {
     bools.allowTranspose = false;
     // bools.myFirstBeatMode = true;
     clearMelody();
+    clearBassLine();
+    generateChords();
+    generateBassLine();
+    //gener8Melody();
     bools.play = true;
     // gener8BDbeat();
     // gener8SDbeat();
     // gener8hats();
 
-    generateChords();
+
+
+
+    //generateBassLine();
     // melodyTEST();
     BDseq = 0b1000100010001000;
     SDseq = 0b0010001000100010;

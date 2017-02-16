@@ -11,7 +11,7 @@ byte mask = B00000010;
 
 */
 
-# define birthdate 30798 //birthdate
+# define birthdate 31751 //birthdate
 
 bool syncFlipFlop = false;
 
@@ -28,7 +28,7 @@ byte mode = 10;
 #define tonepin 4
 #define portBpin 1
 
-byte modulationSteps = 3;
+byte modulationSteps = 4;
 int portBlength = 500;
 byte playMode = 0; //BOTH, BASS, MELODY
 byte octaveselect = 0;
@@ -56,7 +56,7 @@ int barTicker = 1;
 //byte selector = 1;//random(1, 17);
 byte partTicker = 1;
 byte songTicker = 1;
-byte modulationinterval = 2;
+int modulationinterval = 2;
 byte octOffset = 2;
 byte distAmount = 0;
 byte beatSeqSelex = 0;
@@ -114,9 +114,9 @@ struct bools {
   .oldInSignal = true,
   .syncTick = false,
   .sendSync = false,
-  .receiveSync = false,  //false = internal sync , true = external sync
-  .tonesMode = true,
-  .portBMode = true,                                  //flag whether we are in a mode that supports portb or not
+  .receiveSync = false,								//false = internal sync , true = external sync
+  .tonesMode = true,	
+  .portBMode = true,                                //flag whether we are in a mode that supports portb or not
   .transpose = true,
   .allowBDSeqMod = true,
   .allowSDSeqMod = true,
@@ -151,6 +151,11 @@ struct bools {
   .BASS = true,
   .MELODY = true,
 };
+
+byte decayArray[16] = {
+	6,7,7,6,7,7,8,7,3,7,7,2,7,7,7,1
+};
+
 
 
 int bender = 0;
@@ -420,11 +425,13 @@ void setup() {
   // Set up Watchdog timer for 4 Hz interrupt for note output.
   WDTCR = 1 << WDIE | Tempo << WDP0; // 4 Hz interrupt
 
+  
   //generate beats and melodie  gener8BDbeat();
   gener8SDbeat();
   gener8hats();
   //gener8Melody();
-  melodyTEST();
+  //melodyTEST();
+  refreshRandom();
 }
 
 

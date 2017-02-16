@@ -33,7 +33,7 @@ void writeANote(byte STEP, byte note) {
 void gener8Melody() {
   byte timeInterval = random(0, 10);
   for (int i = 0; i < barLength; i = i + random(0, 6)) {   //step through steps randomly like a drunk sensei
-    bitSet(Chords[i], currentScale[random(0, 11) + scalesOffset] + root);
+    bitSet(Chords[i], currentScale[random(0, 5) + scalesOffset] + root);
   }
 }
 
@@ -73,8 +73,8 @@ void generateOctaves() {
 //////////////////////////////////////////////////////////////////////////////////////
 void generateChords() {
   //int root = 12;
-  byte tripChords = 3; random(0, 8);
-  byte chordBeatOffset = 4; random(0, 8);
+  byte tripChords = random(0, 8);
+  byte chordBeatOffset = random(0, 8);
   for (int i = 0; i < barLength; i++) { //step through chords
     Chords[i] = 0;  //delete them preexisting contents
     if ((i + chordBeatOffset) % tripChords == 0) {                 //on step 3-7-11 and so on tripchords chordBeatOffset
@@ -92,7 +92,7 @@ void generateBassLine() {
   byte period = random(2, 9);
   for (int i = 0; i < barLength; i = i + period) {
 //    bitSet(ChordsB[i], 4);
-bitSet(ChordsB[i], root + currentScale[((i%2)*-2)+(scaleSelect*5)]);
+bitSet(ChordsB[i], root + currentScale[((i%period)*-2-(2*i))+(scaleSelect*5)]);
   }
 }
 
@@ -102,3 +102,16 @@ void clearBassLine() {
   }
 }
 
+void generateDecayArray() {
+	byte type = random(0, 2)*2;    //return either 0 or 2 ot add to the decay
+	
+	
+		for (int i = 0; i < 16; i++) {
+			if (i % (barLength / 2) == 0) {
+				decayArray[i] = random(4, 8)-type;
+			}
+			else {
+				decayArray[i] = random(6, 8)-type;
+			}
+	}
+}

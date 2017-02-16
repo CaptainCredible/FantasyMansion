@@ -75,7 +75,7 @@ bools.slowMo = !(selex%2);
 
     for (int Note = 0; Note < 32; Note++) {                         //step through each bit of the 32bit number
       if (bitRead(Chords[(selex) % barLength], Note)) {
-        int freqSelector = ((Note * -1) + 31 - (modulationinterval * (barTicker % 3)) * bools.transpose);
+        int freqSelector = ((Note * -1) + 31 - (modulationinterval * (barTicker % modulationSteps)) * bools.transpose);
         if (freqSelector > 32)
         {
           freqSelector = freqSelector - 12;
@@ -84,7 +84,8 @@ bools.slowMo = !(selex%2);
         }
         int oct = 1<<bitRead(octArray,selex%16);
         Freq[Chan] = (pgm_read_word_near(Scale + freqSelector)) >> (oct) ;//Scale[freqSelector] >> oct;          //look up the notes frequency and shift the octave as per the array
-        Amp[Chan] = (1 + (bitRead(dists, selex))) << (decays[selex % 16] + 6);                       // change to 2 for epic dist
+		Decay = decayArray[selex % 16];
+		Amp[Chan] = (1 + (bitRead(dists, selex))) << (decays[selex % 16] + 6);                       // change to 2 for epic dist
         Chan = (Chan + 1) % (Channels - 1);
       }
     }
@@ -95,7 +96,7 @@ bools.slowMo = !(selex%2);
     for (int Note = 0; Note < 32; Note++) {                         //step through each bit of the 16bit number
       if (bitRead(ChordsB[(selex) % barLength], Note)) {
         int freqSelector = (((Note * -1) + 32) - (modulationinterval * (barTicker % modulationSteps)))-2;    // offset by 6 or 18
-        Freq[Chan] = pgm_read_word_near(Scale + freqSelector) >> 3;                //look up the notes frequency and shift the octave as per the array
+        Freq[Chan] = pgm_read_word_near(Scale + (freqSelector-11)) >> 3;                //look up the notes frequency and shift the octave as per the array
         Amp[Chan] = 2 + (bitRead(dists, selex)) << (decays[selex % 16] + 6);                     // change to 2 for epic dist
         Chan = (Chan + 1) % (Channels - 1);
       }
@@ -107,7 +108,7 @@ bools.slowMo = !(selex%2);
   selex++;                                                     // add one to the selector for chords (step ahead in the index)
   if (selex > barLength - 1) {                                 //if we reached the end
     barTicker++;                                                  //add one to the bar counter
-    if (barTicker >> 1) {
+    if (barTicker > 1) {
       if (bools.allowSDSeqMod) {
         gener8SDbeat();
       }
@@ -124,20 +125,28 @@ bools.slowMo = !(selex%2);
     if (!bools.myFirstSongMode && bools.allowNoteAddition) {                 //if we are allowed to
       addNote();                                                    //add a "random" note
       deleteNote(random(barLength));                                                 //remove a random note (or not if there is no note on the step we chose
+	}
       partTicker++;                                                 //increment the part ticker
-      if (bools.allowTranspose) {
-        bools.transpose = !bools.allowTranspose;
-      }
-    }
+	  bools.BASS = !bools.BASS;										//toggle BAss on and off
+      
+      
+    
+	if (bools.allowBDSeqMod) {
+		gener8BDbeat();
+	}
   }
-  if (partTicker > 3) {
-    songTicker++;
+  if (partTicker > 2) {
+	  partTicker = 0;
+	  songTicker++;
+	if (songTicker > 4) {
+		refreshRandom();
+		songTicker = 0;
+	}
     if (!bools.myFirstBeatMode) {
       gener8BDbeat();
       gener8SDbeat();
       gener8hats();
     }
-    partTicker = 0;
   }
   t = 0;                                                         //set portBt back to 0 so portBs are audible
 

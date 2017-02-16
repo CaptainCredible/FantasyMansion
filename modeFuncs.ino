@@ -53,6 +53,7 @@ void musicbox() {
 
 
 void trigOnChangeSolo() {
+	/*
   if (bools.firstRun) {
     bools.ownBeat = false;
     bools.firstRun = false;
@@ -84,6 +85,7 @@ void trigOnChangeSolo() {
     }
   }
   //bools.oldRightSwitch = false;
+  */
 }
 
 
@@ -115,7 +117,7 @@ void buttonSolos() {
     xMode = 1;
     bools.bend = true;
     Decay = 7;
-    playNoteNow(x, octaveselect, 2);
+   // playNoteNow(x, octaveselect, 2);
   } else {
     refreshRandom();
     xMode = random(0, 2);
@@ -151,7 +153,6 @@ void myFirstSong() {
     bools.myFirstSongMode = true;
     bools.firstRun = false;
   }
-
   bools.play = true;
   if (bools.rightSwitch) {
     xMode = 0;
@@ -197,30 +198,31 @@ void myFirstBeat() {
 void test() {
   if (bools.firstRun) {
     //clearDrums();
-    bools.ownBeat = true;
-    bools.allowBDSeqMod = false;
-    bools.allowHHSeqMod = false;
-    bools.allowSDSeqMod = false;
-    bools.allowTranspose = false;
+    bools.ownBeat = false;
+    bools.allowBDSeqMod = true;
+    bools.allowHHSeqMod = true;
+    bools.allowSDSeqMod = true;
+    bools.allowTranspose = true; 
+	bools.allowNoteAddition = true;
     // bools.myFirstBeatMode = true;
     clearMelody();
     clearBassLine();
     generateChords();
     generateBassLine();
-    //gener8Melody();
+    gener8Melody();
     bools.play = true;
-    // gener8BDbeat();
-    // gener8SDbeat();
-    // gener8hats();
+     gener8BDbeat();
+     gener8SDbeat();
+     gener8hats();
 
 
 
 
     //generateBassLine();
     // melodyTEST();
-    BDseq = 0b1000100010001000;
-    SDseq = 0b0010001000100010;
-    HHseq = 0b0000000000010000;
+    //BDseq = 0b1000100010001000;
+    //SDseq = 0b0010001000100010;
+    //HHseq = 0b0000000000010000;
     bools.firstRun = false;
     bools.BASS = true;
     bools.MELODY = true;

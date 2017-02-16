@@ -8,7 +8,7 @@ if(bools.rightSwitch){
  
  int freqToBePlayed = pgm_read_word_near(Scale + (pgm_read_byte_near(soloScales+X))); //Scale[soloScales[X]];
  
- playNoteNow(freqToBePlayed, octaveselect, 1);
+ //playNoteNow(freqToBePlayed, octaveselect, 1);
  
 
  

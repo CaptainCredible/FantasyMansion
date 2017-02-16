@@ -99,7 +99,7 @@ void modeHandle() {
     PORTB = (PORTB & ~mask) | ((t * (t >> x) >> (t >> 4)) & mask);
     t++;
 
-    playNoteNow(random(0, 2000), 0, 1);
+ //   playNoteNow(random(0, 2000), 0, 1);
 
 
 

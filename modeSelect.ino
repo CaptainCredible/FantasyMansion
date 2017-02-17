@@ -19,16 +19,16 @@ void modeSelect() {
 
 
     case 5: //mad solo , trig on note change
-      trigOnChangeSolo();
+    //  trigOnChangeSolo();
       break;
 
     case 6:
-      trigOnPurifySolo();
+//      trigOnPurifySolo();
       break;
 
 
     case 7:
-    trigOnPurifySolo();
+//    trigOnPurifySolo();
       break;
 
     case 8:
@@ -40,7 +40,7 @@ void modeSelect() {
       break;
 
     case 9:
-      buttonSolos();
+ //     buttonSolos();
       break;
 
     case 10:  //DEBUGMODE

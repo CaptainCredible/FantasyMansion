@@ -107,7 +107,7 @@ void generateDecayArray() {
 	
 	
 		for (int i = 0; i < 16; i++) {
-			if (i % (barLength / 2) == 0) {
+			if ((i)% 4 == 0) {
 				decayArray[i] = random(4, 8)-type;
 			}
 			else {

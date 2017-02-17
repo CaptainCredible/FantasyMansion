@@ -75,7 +75,7 @@ bools.slowMo = !(selex%2);
 
     for (int Note = 0; Note < 32; Note++) {                         //step through each bit of the 32bit number
       if (bitRead(Chords[(selex) % barLength], Note)) {
-        int freqSelector = ((Note * -1) + 31 - (modulationinterval * (barTicker % modulationSteps)) * bools.transpose);
+		  int freqSelector = ((Note * -1) + 31 - (modulationinterval * (barTicker % modulationSteps)));// *bools.transpose);
         if (freqSelector > 32)
         {
           freqSelector = freqSelector - 12;
@@ -139,14 +139,9 @@ bools.slowMo = !(selex%2);
 	  partTicker = 0;
 	  songTicker++;
 	if (songTicker > 4) {
-		refreshRandom();
+		refreshRandom();															//this remakes beats regardless of ownBeat further down so put the if bools ownbeat code in refreshrandom instead
 		songTicker = 0;
 	}
-    if (!bools.myFirstBeatMode) {
-      gener8BDbeat();
-      gener8SDbeat();
-      gener8hats();
-    }
   }
   t = 0;                                                         //set portBt back to 0 so portBs are audible
 

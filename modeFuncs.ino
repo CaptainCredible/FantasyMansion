@@ -12,7 +12,7 @@ void musicbox() {
     t++;
 
   } else if (bools.rightSwitch) { //    If right button is in
-    // bend = true;
+     bools.bend = true;
     xMode = 0;
     octOffset = (x >> 7);
     distAmount = 1;
@@ -90,7 +90,7 @@ void trigOnChangeSolo() {
 
 
 
-
+/*
 void trigOnPurifySolo() {
   //}/*
   bools.play = false;
@@ -101,9 +101,9 @@ void trigOnPurifySolo() {
     chordSolo(x + 10);
   }
 }
-//*/
+*/
 
-
+/*
 void buttonSolos() {
   bools.play = false;
 
@@ -124,6 +124,8 @@ void buttonSolos() {
     octaveselect = random(0, 4);
   }
 }
+
+/*
 
 /*
   void portBplayer() {
@@ -176,7 +178,7 @@ void myFirstBeat() {
     bools.ownBeat = true;
     bools.preserveMelody = true; //this will actually preserve both
     //gener8BDbeat();
-    bools.myFirstBeatMode = true;
+    bools.ownBeat = true;
     bools.play = true;
     bools.disablePortB = false;
     bools.firstRun = false;
@@ -202,9 +204,9 @@ void test() {
     bools.allowBDSeqMod = true;
     bools.allowHHSeqMod = true;
     bools.allowSDSeqMod = true;
-    bools.allowTranspose = true; 
+	bools.allowTranspose = true; 
 	bools.allowNoteAddition = true;
-    // bools.myFirstBeatMode = true;
+    // bools.ownBeat = true;
     clearMelody();
     clearBassLine();
     generateChords();
@@ -220,9 +222,9 @@ void test() {
 
     //generateBassLine();
     // melodyTEST();
-    //BDseq = 0b1000100010001000;
-    //SDseq = 0b0010001000100010;
-    //HHseq = 0b0000000000010000;
+    BDseq = 0b1000100010001000;
+    SDseq = 0b0010001000100010;
+    HHseq = 0b0000000000010000;
     bools.firstRun = false;
     bools.BASS = true;
     bools.MELODY = true;

@@ -1,4 +1,16 @@
 #include <avr/pgmspace.h>
+/*Required modes
+AI musicbox (parallel dimansions and shit) - NO BUTTONS
+User create mode standalone					L or R
+User create mode sync in tones out			L to R
+User create mode sync in drums out			R to L
+User Create mode sync out tones out			L and R to L
+User create mode sync out drums out			L and R to L
+
+in USER create mode TIMER ON BOUBLEBUTT TO GO INTO AI MODE
+
+*/
+
 
 
 byte syncPin = 0; //0=normal 1=tones&sync 4=beat&sync
@@ -49,14 +61,16 @@ int s = 0;
 
 byte melodyOffset = 4;
 byte melodyOffsetOffset = 4;
-byte scalesOffset = 0;
+byte scalesOffset = 0;                                        //is this doing the same as root ?
+
+
 
 int barTicker = 1;
 //int scalesOffset = 10;   was used to select from premade scales, new code will generate scales on the fly ?
 //byte selector = 1;//random(1, 17);
 byte partTicker = 1;
 byte songTicker = 1;
-int modulationinterval = 2;
+int modulationinterval = 0; //will to be set to something else if allowtranspose is true when refreshrandom is called
 byte octOffset = 2;
 byte distAmount = 0;
 byte beatSeqSelex = 0;
@@ -65,59 +79,57 @@ byte beatSeqSelex = 0;
 
 
 struct bools {
-  bool swing: 1;
-  bool inSignal: 1;
-  bool doubleTime: 1;
-  bool oldInSignal: 1;
-  bool syncTick: 1;
-  bool sendSync: 1;
-  bool receiveSync: 1;
-  bool tonesMode: 1;
+  bool swing: 1;							//play with swing or not RANDOMIZE!
+  bool inSignal: 1;							//state of sync in pin
+  bool oldInSignal: 1;						//old state of insignal
+  // bool doubleTime: 1;					// not used? not used
+  bool syncTick: 1;							//ticker to make sure we only change sync pinstate once per tick
+  bool sendSync: 1;							//flag to say we are sending sync
+  bool receiveSync: 1;						//flag to say we are receiving sync
+  bool tonesMode: 1;						//flag to say whether we are bothered with generating poly tones
   bool portBMode: 1;                        //flag whether we are in a mode that supports portb or not
-  bool transpose: 1;
-  bool allowBDSeqMod: 1;
-  bool allowSDSeqMod: 1;
-  bool allowHHSeqMod: 1;
-  bool leftSwitch: 1;
-  bool rightSwitch: 1;
-  bool slowMo: 1;
-  bool portBticker: 1;
-  bool oldLeftSwitch: 1;
-  bool oldRightSwitch: 1;
-  bool play: 1;
-  bool doubleButt: 1;     //to make sure it only runs the doublebutt code once
-  bool bend: 1;
-  bool disablePortB: 1;
-  bool firstRun: 1;
-  bool myFirstSongMode: 1;
-  bool myFirstBeatMode: 1;
-  bool writeNote: 1;
-  bool eraseNote: 1;
-  bool noteWritten: 1;                 //not used
-  bool preserveMelody: 1;
-  bool preserveBeat: 1;               //not used (preservemelody does this too
-  bool allowNoteAddition: 1;
-  bool allowTranspose: 1;             //notUsed
-  bool BANG_L: 1;
-  bool BONG_L: 1;
-  bool BANG_R: 1;
-  bool BONG_R: 1;
-  bool beatWrite: 1;
-  bool beatErase: 1;
-  bool ownBeat: 1;
-  bool BASS: 1;
-  bool MELODY: 1;
+ // bool transpose: 1;						//not needed was always true
+  bool allowBDSeqMod: 1;					//will we allow BD seq to be changed ?
+  bool allowSDSeqMod: 1;					//will we allow SD seq to be changed ?
+  bool allowHHSeqMod: 1;					//will we allow HH seq to be changed ?
+  bool leftSwitch: 1;						//STATE OF LEFT SWITCH
+  bool rightSwitch: 1;						//STATE OF RIGHT SWITCH
+  bool slowMo: 1;							//PLAY HALFTIME? IS USED BY SWING 
+  bool portBticker: 1;						//TICKER FOR PORTBLENGTH COMPARISIN ONLY USED FOR LENGTH 
+  bool oldLeftSwitch: 1;					//old state of leftSwitch
+  bool oldRightSwitch: 1;					//old state of rightSwitch
+  bool play: 1;								//are we playing
+  bool doubleButt: 1;						//to make sure it only runs the doublebutt code once
+  bool bend: 1;								//are we pitchbending?
+  bool disablePortB: 1;						//portB (drums included) on or off
+  bool firstRun: 1;							//first run of a mode, run the mode setup 
+  bool myFirstSongMode: 1;					//user made melody?
+ // bool myFirstBeatMode: 1;					//user made beat?      this one is used to determine whether to remake beats after partTicker goes past 2)
+  bool writeNote: 1;						//flag the watchdoc function to add a note
+  bool eraseNote: 1;						//flag the watchdog to remove a note
+  //bool noteWritten: 1;					//not used
+  bool preserveMelody: 1;					//flag to not overwrite melody
+  //bool preserveBeat: 1;						//not used (preservemelody does this too
+  bool allowNoteAddition: 1;				//are we allowed to add notes? 
+  bool allowTranspose: 1;					 //notUsed
+  bool BANG_L: 1;							//trigger once when left button is pressed
+  bool BONG_L: 1;							//trigger once when left button is released
+  bool BANG_R: 1;							//trigger once when right button is pressed
+  bool BONG_R: 1;							//trigger once when right button is released
+  bool beatWrite: 1;						//write to the beat
+  bool beatErase: 1;						//erase this step of the beat
+  bool ownBeat: 1;							//user made beat (is used by musicbox to determine whether to make new beats when beats are toggled back on)
+  bool BASS: 1;								//bassline on off CONTROLLED BY NOTE PLAYER AND PART TICKER
+  bool MELODY: 1;							//melody on off CONTROLLED BY NOTHING YET, CONTROL ME!!!!!!!!!!!!!!!!!!!!!!!!
 } bools = {
   .swing = false,
   .inSignal = false,
-  .doubleTime = true,
   .oldInSignal = true,
   .syncTick = false,
   .sendSync = false,
   .receiveSync = false,								//false = internal sync , true = external sync
   .tonesMode = true,	
   .portBMode = true,                                //flag whether we are in a mode that supports portb or not
-  .transpose = true,
   .allowBDSeqMod = true,
   .allowSDSeqMod = true,
   .allowHHSeqMod = true,
@@ -133,13 +145,10 @@ struct bools {
   .disablePortB = false,
   .firstRun = true,
   .myFirstSongMode = false,
-  .myFirstBeatMode = false,
   .writeNote = false,
   .eraseNote = false,
-  .noteWritten = false,
   .preserveMelody = false,
-  .preserveBeat = false,
-  .allowNoteAddition = false,
+  .allowNoteAddition = false, //needs implementing properly
   .allowTranspose = true,
   .BANG_L = false,
   .BONG_L = false,
@@ -193,7 +202,7 @@ byte scaleSelect = 0; //0 = minor    1 = major    2 = penta
 
 
 //can be moved to progmem
-byte currentScale[15] {
+byte currentScale[15] {														//5 per scale!!!
   0, 3, 7, 10, 12,//minor
   0, 4, 7, 11, 12, //major
   0, 2, 5, 7, 9 //pentatonic

@@ -30,10 +30,10 @@ void pinRead() {
     } else if (bools.oldInSignal && periodTimer > syncPeriod) { //if either the inSignal isn't high, or if we have allready done whats necessary to do when it went high, check if periodTimer has exeeded what we counted foir last time and make sure we didnt allready do that
       bools.oldInSignal = false;                //flag that we have detected the state where the offbeat note should be triggered by writing oldInSignal to false
 
-      if (bools.doubleTime) {
-        notePlayer();                             //play a note
-        //optionaly make doubleTime selectable
-      }
+   //   if (bools.doubleTime) {
+   //     notePlayer();                             //play a note
+   //     //optionaly make doubleTime selectable
+   //   }
     }
   }
 }

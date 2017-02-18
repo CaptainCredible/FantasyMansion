@@ -1,6 +1,6 @@
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
-void melodyTEST() {
+/*void melodyTEST() {
   for (int i = 0; i < barLength; i++) {        //step through steps
     //Chords[i] = 0;                      //erase steps
     if (true) {
@@ -9,12 +9,12 @@ void melodyTEST() {
     }
   }
 }
-
+*/
 
 
 ////////////////////////////////////////////////////////////////////////////////////
 void clearMelody() {
-  for (int i = 0; i < barLength; i++) {        //step through sequence oc "chords"
+  for (int i = 0; i < barLength; i++) {        //step through sequence "chords"
     Chords[i] = 0; //clear melody       //delete chord
   }
 }
@@ -23,7 +23,7 @@ void clearMelody() {
 
 ///////////////////////////////////////////////////////////////////////////////////////
 void writeANote(byte STEP, byte note) {
-  note = (note * -1) + 32;          //invert note
+	note = 32 - note; //(note * -1) + 32;          //invert note
   bitSet(Chords[STEP], note);        //write note starting with lowest note
 }
 
@@ -33,14 +33,15 @@ void writeANote(byte STEP, byte note) {
 void gener8Melody() {
   byte timeInterval = random(0, 10);
   for (int i = 0; i < barLength; i = i + random(0, 6)) {   //step through steps randomly like a drunk sensei
-    bitSet(Chords[i], currentScale[random(0, 5) + scalesOffset] + root);
+    bitSet(Chords[i], 32-(currentScale[random(5) + (scaleSelect*5)] + root));
   }
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////
 //ADD NOTE RANDOMLY
 void addNote() {
-  bitSet(Chords[random(barLength - 1)], currentScale[random(11) + scalesOffset]);
+  //bitSet(Chords[random(barLength - 1)], 32 - (currentScale[random(5) + (scaleSelect * 5)])-(12*random(2)));
+  bitSet(Chords[random(barLength - 1)], 32 - (currentScale[random(5) + (scaleSelect * 5)] + root) - (12 * random(2)));
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -70,17 +71,16 @@ void generateOctaves() {
 
 
 
-//////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////// CHORDS
 void generateChords() {
   //int root = 12;
   byte tripChords = random(0, 8);
   byte chordBeatOffset = random(0, 8);
   for (int i = 0; i < barLength; i++) { //step through chords
-    Chords[i] = 0;  //delete them preexisting contents
+    //Chords[i] = 0;  //delete them preexisting contents
     if ((i + chordBeatOffset) % tripChords == 0) {                 //on step 3-7-11 and so on tripchords chordBeatOffset
-      //bitSet(Chords[i], 5);
       for (byte chordStep = 0; chordStep < 3; chordStep++) {
-        bitSet(Chords[i], (root + currentScale[(chordStep%5)+(scaleSelect*5)]));       
+        bitSet(Chords[i+(chordStep*bools.Arp)], 32-(root + currentScale[(chordStep%5)+(scaleSelect*5)]));       
       }
     }
   }
@@ -89,10 +89,23 @@ void generateChords() {
 
 
 void generateBassLine() {
-  byte period = random(2, 9);
+	clearBassLine();
+	byte period = random(1, 5);
   for (int i = 0; i < barLength; i = i + period) {
-//    bitSet(ChordsB[i], 4);
-bitSet(ChordsB[i], root + currentScale[((i%period)*-2-(2*i))+(scaleSelect*5)]);
+		byte bassStep = i / period;
+		byte bassScaleSelect = (4 - (bassStep%period)) % 5;
+		if (random(3) == 1) {    //one in three chance to select random bass note (within scale)
+			bassScaleSelect = random(5);
+		}
+		
+		byte bassval = currentScale[bassScaleSelect + (scaleSelect*5)] + root;
+
+//bitSet(ChordsB[i], root + currentScale[(((i%period)*-2-(2*i)))+(scaleSelect*5)]);
+		
+		
+
+		bitSet(ChordsB[i], (16-bassval)+4);//+4);
+		
   }
 }
 

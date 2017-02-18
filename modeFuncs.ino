@@ -208,19 +208,14 @@ void test() {
 	bools.allowNoteAddition = true;
     // bools.ownBeat = true;
     clearMelody();
-    clearBassLine();
-    generateChords();
+    //clearBassLine();
+	generateChords();
     generateBassLine();
     gener8Melody();
     bools.play = true;
-     gener8BDbeat();
-     gener8SDbeat();
-     gener8hats();
-
-
-
-
-    //generateBassLine();
+    gener8BDbeat();
+    gener8SDbeat();
+    gener8hats();
     // melodyTEST();
     BDseq = 0b1000100010001000;
     SDseq = 0b0010001000100010;

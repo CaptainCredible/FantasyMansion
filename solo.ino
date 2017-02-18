@@ -1,4 +1,4 @@
-void chordSolo(int X){
+/*void chordSolo(int X){
   
   X = X/60; //scale X down to 10
   
@@ -13,7 +13,4 @@ if(bools.rightSwitch){
 
  
  }
- 
-
-
-
+ */

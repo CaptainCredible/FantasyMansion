@@ -61,7 +61,7 @@ int s = 0;
 
 byte melodyOffset = 4;
 byte melodyOffsetOffset = 4;
-byte scalesOffset = 0;                                        //is this doing the same as root ?
+//byte scalesOffset = 0;                                        //is this doing the same as root ?
 
 
 
@@ -121,6 +121,8 @@ struct bools {
   bool ownBeat: 1;							//user made beat (is used by musicbox to determine whether to make new beats when beats are toggled back on)
   bool BASS: 1;								//bassline on off CONTROLLED BY NOTE PLAYER AND PART TICKER
   bool MELODY: 1;							//melody on off CONTROLLED BY NOTHING YET, CONTROL ME!!!!!!!!!!!!!!!!!!!!!!!!
+  bool Arp : 1;								//if true chords are broken into arpeggios
+  bool BASSOCT : 1;							//if true bass is one octave down
 } bools = {
   .swing = false,
   .inSignal = false,
@@ -128,7 +130,7 @@ struct bools {
   .syncTick = false,
   .sendSync = false,
   .receiveSync = false,								//false = internal sync , true = external sync
-  .tonesMode = true,	
+  .tonesMode = true,
   .portBMode = true,                                //flag whether we are in a mode that supports portb or not
   .allowBDSeqMod = true,
   .allowSDSeqMod = true,
@@ -159,6 +161,8 @@ struct bools {
   .ownBeat = false,
   .BASS = true,
   .MELODY = true,
+  .Arp = true,
+  .BASSOCT = true,
 };
 
 byte decayArray[16] = {
@@ -314,12 +318,13 @@ unsigned int ChordsB[32] = {
 
 
 
-
+/*
 const uint8_t PROGMEM soloScales[15] {
   0, 3, 7, 10, 12,//minor
   0, 4, 7, 11, 12, //major
   0, 2, 5, 7, 9 //pentatonic
 };
+*/
 
 //Globals persist throughout tune
 byte TunePtr = 0, Chan = 0;

@@ -74,34 +74,46 @@ bools.slowMo = !(selex%2);
   if (bools.MELODY && syncPin != 4) { //   if melodies are allowed
 
     for (int Note = 0; Note < 32; Note++) {                         //step through each bit of the 32bit number
-      if (bitRead(Chords[(selex) % barLength], Note)) {
-		  int freqSelector = ((Note * -1) + 31 - (modulationinterval * (barTicker % modulationSteps)));// *bools.transpose);
+      if (bitRead(Chords[(selex)], Note)) {
+		  int freqSelector = 32 - (Note - ((modulationinterval * (barTicker % modulationSteps))*bools.allowTranspose));// *bools.transpose)
+		  //int freqSelector = ((31-Note) - (modulationinterval * (barTicker % modulationSteps)));// *bools.transpose)
+		  //int freqSelector = ((Note * -1) + 31 - (modulationinterval * (barTicker % modulationSteps)));// *bools.transpose)
         if (freqSelector > 32)
         {
           freqSelector = freqSelector - 12;
         } else if (freqSelector < 0) {
           freqSelector = freqSelector + 12;
         }
-        int oct = 1<<bitRead(octArray,selex%16);
-        Freq[Chan] = (pgm_read_word_near(Scale + freqSelector)) >> (oct) ;//Scale[freqSelector] >> oct;          //look up the notes frequency and shift the octave as per the array
-		Decay = decayArray[selex % 16];
-		Amp[Chan] = (1 + (bitRead(dists, selex))) << (decays[selex % 16] + 6);                       // change to 2 for epic dist
-        Chan = (Chan + 1) % (Channels - 1);
+        int oct = 1<<bitRead(octArray,selex);
+        Freq[Chan] = (pgm_read_word_near(Scale + (freqSelector)%32)) >> (oct) ;//Scale[freqSelector] >> oct;          //look up the notes frequency and shift the octave as per the array
+		//Decay = decayArray[selex % 16];
+		Amp[Chan] = (2 + (bitRead(dists, selex))) << (decays[selex ] + 6);                       // change to 2 for epic dist
+        Chan = (Chan + 1) % (Channels);
       }
+	  //////BASSPLAY//////
+	  if (bitRead(ChordsB[(selex)], Note)) {
+		  
+		  int bassFreqSelector = 32-(Note - ((modulationinterval * (barTicker % modulationSteps))*bools.allowTranspose));    // offset by 6 or 18
+		  Freq[Chan] = (pgm_read_word_near(Scale + (bassFreqSelector -3)%32)) >> (3 + bools.BASSOCT);                //look up the notes frequency and shift the octave as per the array
+		  Amp[Chan] = 2 - (bitRead(dists, selex)) << (decays[selex ] + 5);                     // change to 2 for epic dist
+		  Chan = (Chan + 1) % (Channels);
+	  }
+
     }
   }
 
-  ////////BASSPLAY////////
+ /* ////////BASSPLAY////////
   if (bools.BASS && syncPin != 4) {
     for (int Note = 0; Note < 32; Note++) {                         //step through each bit of the 16bit number
       if (bitRead(ChordsB[(selex) % barLength], Note)) {
         int freqSelector = (((Note * -1) + 32) - (modulationinterval * (barTicker % modulationSteps)))-2;    // offset by 6 or 18
         Freq[Chan] = pgm_read_word_near(Scale + (freqSelector-11)) >> (3+bools.BASSOCT);                //look up the notes frequency and shift the octave as per the array
-        Amp[Chan] = 2 + (bitRead(dists, selex)) << (decays[selex % 16] + 6);                     // change to 2 for epic dist
+        Amp[Chan] = 1 + (bitRead(dists, selex)) << (decays[selex % 16] + 6);                     // change to 2 for epic dist
         Chan = (Chan + 1) % (Channels - 1);
       }
     }
   }
+  */
 
   /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

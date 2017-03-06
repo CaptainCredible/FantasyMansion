@@ -1,4 +1,5 @@
 #include <avr/pgmspace.h>
+#include <avr/wdt.h>
 /*Required modes
 AI musicbox (parallel dimansions and shit) - NO BUTTONS
 User create mode standalone					L or R
@@ -27,7 +28,7 @@ byte mask = B00000010;
 
 
 
-byte mode = 6;
+byte mode = 3;
 #define numberOfModes 6
 #define LED 1    //digital pin 1
 #define LDR 1    //analog pin 1
@@ -50,14 +51,13 @@ byte pip = 0;
 //byte oct;
 int x = 0; //ldr value 0-600
 byte diff = 0;
-byte xMode = 0;
+byte xMode = 1;  // 0 = normal , 1 = insane pitch range, 2 = megapitchrange
 int oldX = 0;
 byte selex = 0;
 int t = 0;             //drum portB timer
 int s = 0;
 
-byte melodyOffset = 4;
-//byte melodyOffsetOffset = 4;
+byte portBselector = 4;
 //byte scalesOffset = 0;                                        //is this doing the same as root ?
 
 
@@ -76,6 +76,7 @@ byte beatSeqSelex = 0;
 
 
 struct bools {
+	bool TMelOrFBass : 1;
 	bool swing : 1;							//play with swing or not RANDOMIZE!
 	bool inSignal : 1;							//state of sync in pin
 	bool oldInSignal : 1;						//old state of insignal
@@ -121,6 +122,7 @@ struct bools {
 	bool Arp : 1;								//if true chords are broken into arpeggios
 	bool BASSOCT : 1;							//if true bass is one octave down
 } bools = {
+  .TMelOrFBass = true,
   .swing = false,
   .inSignal = false,
   .oldInSignal = true,
@@ -140,7 +142,7 @@ struct bools {
   .oldRightSwitch = false,
   .play = false,
   .doubleButt = false,
-  .bend = false,
+  .bend = true,
   .disablePortB = false,
   .firstRun = true,
   .myFirstSongMode = false,
@@ -179,7 +181,7 @@ byte mood = 4; //how fast the t increases
 
 
 byte arpLength = 9;
-#define initBarLength 16
+#define initBarLength 32
 byte barLength = initBarLength;
 
 // here are the notes pitches bitches
@@ -212,7 +214,7 @@ const byte chordIntevals[9]{
 #define Channels 4
 byte baseTempo = 3;
 byte Tempo = 4;      // 4 = 4 beats per second
-byte Decay = 6;    // Length of note decay; max 10
+byte Decay = 10;    // Length of note decay; max 10
 
 unsigned int Acc[Channels];   //should be volatile ?
 unsigned int Freq[Channels];  //should be volatile ?
@@ -260,9 +262,11 @@ unsigned long Chords[initBarLength] = {
 
 
 
-int doublers = 0B0001000100000000;                                                                            //NOT YET IMPLEMENTED
-byte decays[16]{ 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5 };                                             //DECAYS ARE ACTUALLY LOUDNESS!
-int dists = 0B0001000100010001;
+//int doublers = 0B0001000100000000;                                                                            //NOT YET IMPLEMENTED
+//byte amps[16]{ 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5 };                                             //DECAYS ARE ACTUALLY LOUDNESS!
+//int dists = 0B0001000100010001;
+int dists = 0B0010010010010001;
+
 //byte octArray[16] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
 byte octArray = 0B0000000000000000;
 byte root = 12;
@@ -332,11 +336,30 @@ void setup() {
 	pinMode(LDRpin, INPUT_PULLUP);
 
 
-
 	///BOOTMODES///
 	if (!digitalRead(SW1) && !digitalRead(SW2)) { // if both buttons are pushed upon boot
+		pinMode(tonepin, INPUT);
+		pinMode(portBpin, INPUT);
 		while (syncPin == 0) {                    //check witch one is released first to decide sync mode  //0=normal 1=tones&sync 4=beat&sync
+			if (digitalRead(portBpin)) {			  //if the portBpin recieves a pulse, set mode to sync in on portBpin
+				bools.portBMode = false;
+				//bools.tonesMode = true;  not needed, tonesmode is already true here
+				bools.receiveSync = true;
+				syncPin = portBpin;
+				pinMode(tonepin, OUTPUT);
+				mask = B00000000; // if we are in tones and sync mode, we dont want to let portBs out of the portBpin! ALL PORTB GENERATORS SHOULD BE MUTED
+			}
+			else if (digitalRead(tonepin)) {
+				syncPin = tonepin;                          //received sync on tonepin means syncPin 40, listen to sync on tones pin and play portB ///////////////////////////////////////////////////////////////////////////
+				pinMode(tonepin, INPUT);
+				bools.receiveSync = true;
+				bools.tonesMode = false;
+				bools.portBMode = true;
+				//bools.portBmode = true;                   //not needed , portBmode should already be true here
+			}
 
+			/*
+//OLD CODE TO CHECK WHAT BUTT IS RELEASED FIRST
 			if (digitalRead(SW1)) {                 // TONES OUT AND SYNC OUT /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 				bools.portBMode = false;
@@ -355,38 +378,26 @@ void setup() {
 				mask = B00000010;
 
 			}
+			*/
 		}
+
 	}
 	else if (!digitalRead(SW1)) {             //only SW1 means mode 10  START RIGHT IN TONES WRITING MODE PERHAPS? ////////////////////////////////////////////////////////////////////////////////
-		syncPin = 100;
-		bools.portBMode = true;
+		bools.portBMode = false;
 		bools.tonesMode = true;
-		while (!digitalRead(SW1)) {
+		bools.sendSync = true;
+		syncPin = 1;
+		mask = B00000000; // if we are in tones and sync mode, we dont want to let portBs out of the portBpin! ALL PORTB GENERATORS SHOULD BE MUTED
 
-
-			if (!digitalRead(SW2)) {                //SW1 + SW2 means mode 10, SYNCIN ON PORTBPIN!!! ////////////////////////////////////////////////////////////////////////////////////////////////////
-				syncPin = 1;  //syncPin 30 is listen to sync and play tones
-				pinMode(portBpin, INPUT);
-				bools.receiveSync = true;
-				bools.portBMode = false;
-				bools.tonesMode = true;
-			}
-		}
 
 	}
 	else if (!digitalRead(SW2)) {             //only SW2 means mode 20 start right on beats prog pergaps? /////////////////////////////////////////////////////////////////////////////////////////
-		syncPin = 100;
 		bools.portBMode = true;
-		bools.tonesMode = true;
-		while (!digitalRead(SW2)) {
-			if (!digitalRead(SW1)) {
-				syncPin = 4;                          //switch2 + 1 means syncPin 40, listen to sync on tones pin and play portB ///////////////////////////////////////////////////////////////////////////
-				pinMode(tonepin, INPUT);
-				bools.receiveSync = true;
-				bools.tonesMode = false;
-				bools.portBMode = true;
-			}
-		}
+		bools.tonesMode = false;
+		bools.sendSync = true;
+		syncPin = 4;
+		mask = B00000010;
+
 	}
 	else {
 		bools.allowTranspose = true;
@@ -433,6 +444,8 @@ void setup() {
 
 	// Set up Watchdog timer for 4 Hz interrupt for note output.
 	WDTCR = 1 << WDIE | Tempo << WDP0; // 4 Hz interrupt
+	//setup_watchdog
+
 
 
 	//generate beats and melodie  gener8BDbeat();
@@ -455,10 +468,8 @@ void loop() {
 	pinRead();          //check the states of the pins
 	BANGdetectors();
 	modeHandle();       //cycle throuth the modes when necessary
-	xManip(xMode);   // manipulate x value : 1=insanepitchrange 2=megapitchrange 0 = donothing
-	if (!bools.bend) {
-		bender = 0;
-	}
+
+
 	if (bools.syncTick) {
 		digitalWrite(syncPin, !((selex + 1) % 2));
 		bools.syncTick = false;

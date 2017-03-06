@@ -5,8 +5,18 @@ void clearDrums() {
 }
 
 void gener8BDbeat() {
-	//BDseq = 0B1000100000000000;
+	if(random(2)){
+		BDseq = 0B1000100010001000;
+		//BDseq = 0B1001001001001001;
+	}
+	else {
+		//BDseq = 0B1000100010001000;
+		BDseq = 0B1001001001001010;
+	}
 
+	//BDseq = 0B1000100000000000;
+	/* old DBSEQMAKER*/
+	/*
 	for (int i = 15; i > -1; i--) {
 		if (i % 4 == 3) {
 			if (random(8) < 6) {           //each 4th step has a 3 in 4 chance of generating a BD
@@ -14,13 +24,14 @@ void gener8BDbeat() {
 			}
 		}
 	}
+	*/
 }
 
 void gener8SDbeat() {
 	SDseq = 0;
 	for (int i = 15; i > -1; i--) {
 		if (random(0, 6) == 0) {           //each step has a 1 in 5 chance of generating a BD
-	      bitSet(SDseq, i);                 //set current bit high
+			bitSet(SDseq, i);                 //set current bit high
 		}
 	}
 }
@@ -29,7 +40,7 @@ void gener8hats() {
 	HHseq = 0;
 	for (int i = 15; i > -1; i--) {
 		if (random(0, 6) == 0) {           //each step has a 1 in 5 chance of generating a BD
-	      bitSet(HHseq, i);                   //set the bit for current step to high
+			bitSet(HHseq, i);                   //set the bit for current step to high
 		}
 	}
 }
@@ -38,7 +49,7 @@ void gener8hatsStraight() {
 	HHseq = 0;
 	for (int i = 15; i > -1; i--) {
 		if (i % 2 == 0) {
-			   bitSet(HHseq, i);
+			bitSet(HHseq, i);
 		}
 	}
 }

@@ -1,45 +1,43 @@
 void musicbox() {
-
-
 	if (bools.firstRun) {             //one time code
+
+		xMode = 0;
 		bools.disablePortB = false;
 		bools.play = true;
 		bools.firstRun = false;
 		clearDrums();
 		bools.ownBeat = false;
-		bools.allowBDSeqMod = true;
 		bools.allowHHSeqMod = true;
 		bools.allowSDSeqMod = true;
 		bools.allowTranspose = true;
-		bools.allowNoteAddition = true;
 		bools.allowBDSeqMod = false;
+		bools.allowNoteAddition = true;
 		// bools.ownBeat = true;
 		clearMelody();
 		clearBassLine();
-		generateChords();   //not working
+		generateChords();
 		generateBassLine();
-		//gener8Melody();		//not working
+		gener8Melody();		
 		gener8BDbeat();
 		//gener8SDbeat();
-		//gener8hats();
-		// melodyTEST();
-		// BDseq = 0b1000100010001000;
-		// SDseq = 0b0010001000100010;
-		// HHseq = 0b0000000000010000;
-		bools.BASS = true;
+		gener8hatsStraight();
+		bools.BASS = false;
 		bools.MELODY = true;
+
 		//refreshRandom();
 	}
-	if (bools.leftSwitch) {    //if left button is in
-		gener8SDbeat();
-		Decay = 4;
 
-		playPortBsamp(t, melodyOffset);
+	if (bools.leftSwitch) {    //if left button is in
+		bools.bend = true;
+
+//		Decay = 4;
+		octOffset = (x >> 7);
+		playPortBsamp(t, portBselector);
 		t++;
 
 	}
 	else if (bools.rightSwitch) { //    If right button is in
-		bools.bend = true;
+
 		xMode = 0;
 		octOffset = (x >> 7);
 		distAmount = 1;
@@ -49,7 +47,7 @@ void musicbox() {
 	else {                    //if no buttons are in
 		xMode = 0;
 		bools.bend = false;
-		Decay = 7;
+		//Decay = 10;
 		distAmount = 0;
 
 		if (bools.BONG_L) {            //if this is transition from On to Off
@@ -66,6 +64,7 @@ void musicbox() {
 			if (playMode % 3 == 0) {
 				bools.BASS = true;
 				bools.MELODY = true;
+				bools.bend = false;
 			}
 			else if (playMode % 3 == 1) {
 				bools.MELODY = true;
@@ -81,6 +80,83 @@ void musicbox() {
 	}
 
 }
+
+void myFirstSong() {
+	if (bools.firstRun) {
+		xMode = 0;
+		bools.disablePortB = false;
+		bools.play = true;
+		bools.ownBeat = false;
+		bools.preserveMelody = true;
+		bools.allowBDSeqMod = false;
+		bools.allowHHSeqMod = false;
+		bools.allowSDSeqMod = false;
+		bools.myFirstSongMode = true;
+		bools.allowTranspose = false;
+		bools.bend = false;
+		bools.allowHHSeqMod = true;
+		bools.allowSDSeqMod = true;
+		bools.allowBDSeqMod = true;
+		bools.allowNoteAddition = true;
+		bools.MELODY = true;
+		bools.BASS = true;
+		clearMelody();
+		clearBassLine();
+		clearDrums();
+		gener8BDbeat();
+		bools.firstRun = false;
+		for (int i = 0; i < 16; i++) {
+	//		amps[i] = 4;
+		}
+	}
+
+	bools.play = true;
+	if (bools.BANG_L) {
+		xMode = 0;
+		bools.writeNote = true;
+		//playNoteNow(1000, 1, 2);
+	}
+	else if (bools.BANG_R) {
+		bools.eraseNote = true;
+	}
+	else if (bools.BONG_L) {
+		bools.writeNote = false;
+	}
+	else if (bools.BONG_R) {
+		bools.eraseNote = false;
+	}
+
+
+
+}
+
+void myFirstBeat() {
+	if (bools.firstRun) {
+		bools.ownBeat = true;
+		bools.preserveMelody = true; //this will actually preserve both
+		bools.allowBDSeqMod = false;
+		bools.allowHHSeqMod = false;
+		bools.allowSDSeqMod = false;
+		bools.ownBeat = true;
+		bools.play = true;
+		bools.disablePortB = false;
+		bools.firstRun = false;
+		BDseq = 0;
+		SDseq = 0;
+		HHseq = 0;
+	}
+	if (bools.rightSwitch) {
+		bools.beatWrite = true;
+	}
+	else if (bools.leftSwitch) {
+		bools.beatErase = true;
+	}
+	else {
+		bools.beatErase = false;
+		bools.beatWrite = false;
+	}
+}
+
 
 
 void trigOnChangeSolo() {
@@ -99,12 +175,12 @@ void trigOnChangeSolo() {
 
 	}
 	if (bools.leftSwitch) {
-		playPortBsamp(t, melodyOffset);
+		playPortBsamp(t, portBselector);
 		//PORTB = (PORTB & ~mask) | (t % ((t >> x) & (t >> 5))) & mask ;
 		t++;
 	}
 	if (bools.rightSwitch) {
-		playPortBsamp(t, melodyOffset);
+		playPortBsamp(t, portBselector);
 		//PORTB = (PORTB & ~mask) | (((t * (t >> 4 | t >> 9) | (t / 256 + x)&t >> 8)) ^ (t & t >> 8 | t >> 6)) & mask;
 		t++;
 		if (bools.BANG_R) {
@@ -143,13 +219,13 @@ void buttonSolos() {
 		xMode = 0;
 		a = x / 10;
 
-		playPortBsamp(t, melodyOffset);
+		playPortBsamp(t, portBselector);
 		t++;
 	}
 	else if (bools.leftSwitch) {
 		xMode = 1;
 		bools.bend = true;
-		Decay = 7;
+//		Decay = 7;
 		// playNoteNow(x, octaveselect, 2);
 	}
 	else {
@@ -161,78 +237,28 @@ void buttonSolos() {
 
 
 void portBplayer() {
-	bools.disablePortB = true; //only disaples drums
+	bools.disablePortB = true; //only disables drums
 	if (bools.BANG_R) {
 		pip++;
 		pip = pip % 5;
-	}else if (bools.leftSwitch) {
+	}
+	else if (bools.leftSwitch) {
 		refreshRandom();
-		playNoteNow(random(90, 3000), 1, 4);
-	} else {
+		playNoteNow(x, 1, 4);
+	}
+	else {
 
 		// bools.Blink=true;
 		//refreshRandom();
 		//xMode = 0;
 		//octaveselect = random(0, 4);
 		//t = 0;
-		t = s>>pip;
+		t = s >> pip;
 	}
 	//a = x / 10;
 	bools.bend = true;
-	playPortBsamp(t, melodyOffset); //using melody offset so i dont need to store an own portB
-	
-}
+	playPortBsamp(t, portBselector); //using melody offset so i dont need to store an own portB
 
-void myFirstSong() {
-	if (bools.firstRun) {
-		bools.preserveMelody = true;
-		clearMelody();
-		bools.myFirstSongMode = true;
-		bools.firstRun = false;
-	}
-	bools.play = true;
-	if (bools.rightSwitch) {
-		xMode = 0;
-		bools.writeNote = true;
-	}
-	else if (bools.leftSwitch) {
-		bools.eraseNote = true;
-	}
-	else {
-		bools.writeNote = false;
-		bools.eraseNote = false;
-		//bools.noteWritten = false;
-	}
-
-
-
-}
-
-
-
-void myFirstBeat() {
-	if (bools.firstRun) {
-		bools.ownBeat = true;
-		bools.preserveMelody = true; //this will actually preserve both
-		//gener8BDbeat();
-		bools.ownBeat = true;
-		bools.play = true;
-		bools.disablePortB = false;
-		bools.firstRun = false;
-		BDseq = 0;
-		SDseq = 0;
-		HHseq = 0;
-	}
-	if (bools.rightSwitch) {
-		bools.beatWrite = true;
-	}
-	else if (bools.leftSwitch) {
-		bools.beatErase = true;
-	}
-	else {
-		bools.beatErase = false;
-		bools.beatWrite = false;
-	}
 }
 
 

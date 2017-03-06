@@ -3,7 +3,7 @@ void generatePolyTones(){
 // Generate square waves on 4 channels
   signed char Temp, Mask, Env, Note, Sum=0;
   for (int c = 0; c < Channels; c++) {
-    int fraqwancy = (Freq[c]);//+bender);//>>2);
+    int fraqwancy = (Freq[c] + bender);//+bender);//>>2);
     Acc[c] = Acc[c] + (fraqwancy<<(octOffset));  
     Amp[c] = Amp[c] - (Amp[c] != 0)+ distAmount;       //
     Temp = Acc[c] >> 8;

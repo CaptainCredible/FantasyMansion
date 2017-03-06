@@ -32,10 +32,10 @@ byte OutPut(long i, byte selector) {
 		 //break;
 
 
-	case 4:
+	//case 4:
 		//Serpinskis Anus
-		return (i & i >> a | i >> (b / 2));
-		break;
+		//return (i & i >> a | i >> (b / 2));
+		//break;
 		/*
 	  case 7:
 		//descent into hell

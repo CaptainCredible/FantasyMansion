@@ -27,31 +27,38 @@ void playNextNote() {
 	////////////////////////WRITING NOTES AND DRUMS///////////////////////////////
 	if (bools.writeNote) {
 		int EXX = 600 - x;                    //EXX is remapped x
-		EXX = EXX >> 3;
+		//int EXX = x;
+		//EXX = EXX >> 3;
+		
+		/*
 		if (EXX < 0) {
 			EXX = 0;
+			
 		}
 		else if (EXX > 31) {
 			EXX = 31;
 		}
-		int pop = selex;
+		*/
+
+		int EXXOCT = EXX / 5;
+
+		//int pop = selex;
 		if (bools.TMelOrFBass) {
-			bitSet(Chords[(selex) % barLength], EXX);
-			playNoteNow(Scale[EXX], bitRead(octArray, selex), 5);
+			bitSet(Chords[(selex) % barLength], (Scale[(EXX%5)+scaleSelect]+(12*EXXOCT))%32);  //the note will be played immediately afterwards
 		}
 		else {
-			bitSet(ChordsB[(selex) % barLength], EXX%16);
-			playNoteNow(Scale[EXX%16], bitRead(octArray, selex), 5);
+			bitSet(ChordsB[(selex) % barLength], EXX%16);  //the note will be played immediately afterwards
 		}
-		//bools.writeNote = false;
-
+		bools.writeNote = false;
 	}
 	if (bools.eraseNote) {
-		if (bools.TMelOrFBass) {}
-		Chords[selex] = 0;
-	}else{
-		ChordsB[selex] = 0;
-		//bools.eraseNote = 0;
+		if (bools.TMelOrFBass) {
+			Chords[selex] = 0;
+		}
+		else {
+			ChordsB[selex] = 0;
+			bools.eraseNote = false;
+		}
 	}
 
 	if (bools.beatWrite) {
@@ -78,7 +85,7 @@ void playNextNote() {
 
 	//////////////////////////////////////////////////////////////////////////////////////////////
 	if (bools.swing) {
-		bools.slowMo = !(selex % 2);
+		bools.slowMo = !((selex+1) % 2);
 	}
 	Tempo = baseTempo + bools.slowMo;                                    //used for swing
 	WDTCR = 1 << WDIE | Tempo << WDP0; // 4 Hz interrupt
@@ -153,7 +160,7 @@ void playNextNote() {
 				gener8SDbeat();
 			}
 			if (bools.allowHHSeqMod) {
-				gener8hats();
+			//	gener8hats();
 			}
 		}
 		if ((barTicker % 2 == 0) && (random(2) == 1)) {                 //on even ticks there is a 50% chance of adding a note
@@ -170,7 +177,7 @@ void playNextNote() {
 			deleteNote(random(barLength));                                                 //remove a random note (or not if there is no note on the step we chose
 		}
 		partTicker++;                                                 //increment the part ticker
-		bools.BASS = true;//( !bools.BASS;										//toggle BAss on and off
+		//bools.BASS = true;//( !bools.BASS;										//toggle BAss on and off
 
 
 

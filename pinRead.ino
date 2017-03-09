@@ -1,5 +1,6 @@
 void pinRead() {
 	//GET x
+	
 	x = (analogRead(LDR) * -1) + 1024; //invert the range (because it is pullup)
 	x = x - 400;
 	xManip(xMode);   // manipulate x value : 1=insanepitchrange 2=megapitchrange 0 = donothing
@@ -69,18 +70,27 @@ void modeHandle() {
 
 	if (bools.leftSwitch & bools.rightSwitch) {
 		if (!bools.doubleButt) {                                              //make sure we havent already run this once this time
+			dingDong();
 			bools.disablePortB = false;
 			bools.play = false;
 			bools.doubleButt = true;                                            //flag that we have run the doublebutt code for this time
-			playNoteNow(4400, 2, 5);
-			delay(200);
-			playNoteNow(4400, 2, 5);
+			bools.limbo = true;
 		}
 	}
 
 	if (bools.doubleButt && !(bools.leftSwitch || bools.rightSwitch)) {        //if they where both pressed in and now they have both been released!
 		bools.doubleButt = false;
+		bools.limbo = false;
+		if (!bools.tonesMode) {
+			if (mode == 1) {
+				mode = 3;
+			}
+			else {
+				mode = 0;
+			}
+		}
 		mode++;
+		portBselector = (portBselector + 1) % 4;
 		mode = mode % numberOfModes;
 		if (!bools.preserveMelody) {
 			refreshRandom();                //refresh the melody if bools.preserveMelody isn't flagged

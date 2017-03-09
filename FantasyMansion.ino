@@ -1,17 +1,15 @@
 #include <avr/pgmspace.h>
 #include <avr/wdt.h>
 /*Required modes
-AI musicbox (parallel dimansions and shit) - NO BUTTONS
-User create mode standalone					L or R
-User create mode sync in tones out			L to R
-User create mode sync in drums out			R to L
-User Create mode sync out tones out			L and R to L
-User create mode sync out drums out			L and R to L
-
-in USER create mode TIMER ON BOUBLEBUTT TO GO INTO AI MODE
-
+L+R = wait for sync signal and choose
+just L send sync on drums
+just R send sync on tones
 */
 
+
+// funcs i'd like to add:
+// OSCCAL+=1 OSCCAL+-1 mode
+//steam
 
 
 byte syncPin = 0; //0=normal 1=tones&sync 4=beat&sync
@@ -28,8 +26,8 @@ byte mask = B00000010;
 
 
 
-byte mode = 3;
-#define numberOfModes 6
+byte mode = 1;
+#define numberOfModes 9
 #define LED 1    //digital pin 1
 #define LDR 1    //analog pin 1
 #define LDRpin 2 //digital pin 2 
@@ -76,6 +74,7 @@ byte beatSeqSelex = 0;
 
 
 struct bools {
+	bool limbo : 1;							//define whether we are supposed to do a mode or not
 	bool TMelOrFBass : 1;
 	bool swing : 1;							//play with swing or not RANDOMIZE!
 	bool inSignal : 1;							//state of sync in pin
@@ -122,6 +121,7 @@ struct bools {
 	bool Arp : 1;								//if true chords are broken into arpeggios
 	bool BASSOCT : 1;							//if true bass is one octave down
 } bools = {
+	.limbo = false,					//define whether we are supposed to do a mode or not
   .TMelOrFBass = true,
   .swing = false,
   .inSignal = false,
@@ -337,26 +337,29 @@ void setup() {
 
 
 	///BOOTMODES///
+
 	if (!digitalRead(SW1) && !digitalRead(SW2)) { // if both buttons are pushed upon boot
 		pinMode(tonepin, INPUT);
 		pinMode(portBpin, INPUT);
 		while (syncPin == 0) {                    //check witch one is released first to decide sync mode  //0=normal 1=tones&sync 4=beat&sync
 			if (digitalRead(portBpin)) {			  //if the portBpin recieves a pulse, set mode to sync in on portBpin
 				bools.portBMode = false;
-				//bools.tonesMode = true;  not needed, tonesmode is already true here
 				bools.receiveSync = true;
 				syncPin = portBpin;
 				pinMode(tonepin, OUTPUT);
 				mask = B00000000; // if we are in tones and sync mode, we dont want to let portBs out of the portBpin! ALL PORTB GENERATORS SHOULD BE MUTED
 			}
 			else if (digitalRead(tonepin)) {
-				syncPin = tonepin;                          //received sync on tonepin means syncPin 40, listen to sync on tones pin and play portB ///////////////////////////////////////////////////////////////////////////
-				pinMode(tonepin, INPUT);
-				bools.receiveSync = true;
 				bools.tonesMode = false;
+				syncPin = tonepin;                          //received sync on tonepin means syncPin 40, listen to sync on tones pin and play portB ///////////////////////////////////////////////////////////////////////////
+				pinMode(portBpin, OUTPUT);
+				bools.receiveSync = true;
 				bools.portBMode = true;
-				//bools.portBmode = true;                   //not needed , portBmode should already be true here
+				
 			}
+			while (!digitalRead(SW1) || !digitalRead(SW2)) {
+				//wait
+	}
 
 			/*
 //OLD CODE TO CHECK WHAT BUTT IS RELEASED FIRST

@@ -22,8 +22,11 @@ byte OutPut(long i, byte selector) {
 
 	case 3:
 		// drunk drum machine,
-		return (i * (b / 2) | i >> a) | (i * c & i >> 3);
+		//return (i * (b / 2) | i >> a) | (i * c & i >> 3);
+		//Serpinskis Anus
+		return (i & i >> a | i >> (b / 2));
 		break;
+
 
 
 		//case 4:

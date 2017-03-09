@@ -13,16 +13,18 @@ void musicbox() {
 		bools.allowBDSeqMod = false;
 		bools.allowNoteAddition = true;
 		// bools.ownBeat = true;
-		clearMelody();
-		clearBassLine();
-		generateChords();
-		generateBassLine();
-		gener8Melody();		
-		gener8BDbeat();
-		//gener8SDbeat();
-		gener8hatsStraight();
-		bools.BASS = false;
-		bools.MELODY = true;
+		if (!bools.preserveMelody) {
+			clearMelody();
+			clearBassLine();
+			generateChords();
+			generateBassLine();
+			gener8Melody();
+			gener8BDbeat();
+			//gener8SDbeat();
+			gener8hatsStraight();
+			bools.MELODY = true;
+			bools.BASS = false;
+		}
 
 		//refreshRandom();
 	}
@@ -83,6 +85,10 @@ void musicbox() {
 
 void myFirstSong() {
 	if (bools.firstRun) {
+		if (!bools.preserveMelody) {
+			clearMelody();
+			clearBassLine();
+		}
 		xMode = 0;
 		bools.disablePortB = false;
 		bools.play = true;
@@ -100,30 +106,29 @@ void myFirstSong() {
 		bools.allowNoteAddition = true;
 		bools.MELODY = true;
 		bools.BASS = true;
-		clearMelody();
-		clearBassLine();
+		
 		clearDrums();
 		gener8BDbeat();
 		bools.firstRun = false;
 		for (int i = 0; i < 16; i++) {
 	//		amps[i] = 4;
+
 		}
 	}
 
+
 	bools.play = true;
-	if (bools.BANG_L) {
-		xMode = 0;
-		bools.writeNote = true;
-		//playNoteNow(1000, 1, 2);
-	}
-	else if (bools.BANG_R) {
+	if (bools.leftSwitch) {
+		
 		bools.eraseNote = true;
 	}
-	else if (bools.BONG_L) {
-		bools.writeNote = false;
+	else if (bools.rightSwitch) {
+		xMode = 0;
+		bools.writeNote = true;
 	}
-	else if (bools.BONG_R) {
+	else {
 		bools.eraseNote = false;
+		bools.writeNote = false;
 	}
 
 
@@ -146,7 +151,7 @@ void myFirstBeat() {
 		HHseq = 0;
 	}
 	if (bools.rightSwitch) {
-		bools.beatWrite = true;
+		bools.beatWrite = true;		
 	}
 	else if (bools.leftSwitch) {
 		bools.beatErase = true;
@@ -162,8 +167,10 @@ void myFirstBeat() {
 void trigOnChangeSolo() {
 
 	if (bools.firstRun) {
+		bools.portBMode = false;
 		//bools.ownBeat = false;
 		//bools.firstRun = false;
+		xMode = 0;
 	}
 	bools.play = false;
 	//digitalWrite(LED, LOW);
@@ -180,7 +187,7 @@ void trigOnChangeSolo() {
 		t++;
 	}
 	if (bools.rightSwitch) {
-		playPortBsamp(t, portBselector);
+		playPortBsamp(t, (portBselector+1)%5);
 		//PORTB = (PORTB & ~mask) | (((t * (t >> 4 | t >> 9) | (t / 256 + x)&t >> 8)) ^ (t & t >> 8 | t >> 6)) & mask;
 		t++;
 		if (bools.BANG_R) {
@@ -200,7 +207,7 @@ void trigOnChangeSolo() {
 
 void trigOnPurifySolo() {
 	//bools.play = false;
-	bools.portBMode = false;
+	//bools.portBMode = false;
 	if (bools.BANG_R) {
 		chordSolo(x);
 	}

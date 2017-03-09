@@ -24,7 +24,5 @@ void xManip(int select) {
 
 	default:
 		break;
-
 	}
 }
-

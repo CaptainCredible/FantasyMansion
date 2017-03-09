@@ -10,8 +10,8 @@ void refreshRandom() {
 	root = random(0, 12);
 
 	baseTempo = 3;
-	//baseTempo = random(3,5);
-	portBselector = random(0, 4);       //THIS IS ACTUALLY PORTB SELECTOR
+	baseTempo = random(3,5);
+	portBselector = random(0, 4);       
 	scaleSelect = 2;
 	scaleSelect = random(0, 3);
 	modulationSteps = random(0, 6);
@@ -24,8 +24,7 @@ void refreshRandom() {
 
 	//FUNCS
 	//generateDecayArray();
-	gener8Melody();
-	generateBassLine();
+
 	// melodyTEST();
 	if (!bools.ownBeat) {
 		gener8BDbeat();

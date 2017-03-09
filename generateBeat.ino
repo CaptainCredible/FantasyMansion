@@ -28,21 +28,26 @@ void gener8BDbeat() {
 }
 
 void gener8SDbeat() {
-	SDseq = 0;
-	for (int i = 15; i > -1; i--) {
-		if (random(0, 6) == 0) {           //each step has a 1 in 5 chance of generating a BD
-			bitSet(SDseq, i);                 //set current bit high
+	if (bools.portBMode) {
+		SDseq = 0;
+		for (int i = 15; i > -1; i--) {
+			//if (random(0, 6) == 0) {           //each step has a 1 in 5 chance of generating a BD
+			if (random(0, 6) == 0) {           //each step has a 1 in 5 chance of generating a BD
+				bitSet(SDseq, i);                 //set current bit high
+			}
 		}
 	}
 }
 
 void gener8hats() {
+	if(bools.portBMode){      //deactivate this shit is we arent making portbs cos it is slow
 	HHseq = 0;
 	for (int i = 15; i > -1; i--) {
 		if (random(0, 6) == 0) {           //each step has a 1 in 5 chance of generating a BD
 			bitSet(HHseq, i);                   //set the bit for current step to high
 		}
 	}
+}
 }
 
 void gener8hatsStraight() {

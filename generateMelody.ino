@@ -60,7 +60,9 @@ void generateOctaves() {
 }
 
 
-
+void dingDong() {
+	playNoteNow(2000, 1, 5);
+}
 
 
 
@@ -119,7 +121,7 @@ void clearBassLine() {
 
 /*
 void generateDecayArray() {
-	int type = -10*random(2);    //return either 0 or 2 ot add to the decay	
+	int type = -10*random(2);    //return either 0 or 2 ot add to the decay
 	byte trip = random(2, 5);
 	for (byte i = 0; i < 16; i++) {
 		//amps[i] = 6;
@@ -134,7 +136,7 @@ void generateDecayArray() {
 		else {
 			amps[i] = random(1000, 7000) - type;
 		}
-		
+
 
 	}
 }

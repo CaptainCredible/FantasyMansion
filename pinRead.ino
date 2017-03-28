@@ -1,9 +1,11 @@
 void pinRead() {
 	//GET x
-	
-	x = (analogRead(LDR) * -1) + 1024; //invert the range (because it is pullup)
+
+
+	purex = analogRead(LDR); //invert the range (because it is pullup)
+	x = 1024 - purex;
 	x = x - 400;
-	xManip(xMode);   // manipulate x value : 1=insanepitchrange 2=megapitchrange 0 = donothing
+	//xManip(xMode);   // manipulate x value : 1=insanepitchrange 2=megapitchrange 0 = donothing
 	if (bools.bend) {
 		bender = x;
 	}
@@ -11,7 +13,8 @@ void pinRead() {
 		bender = 0;
 	}
 
-
+	correctedx = map(purex, 0, 500, 0, 1408); // 1024>>5=32 1536
+	correctedx = constrain(purex, 0, 1408);
 
 	byte pinState = PINB;
 	bools.leftSwitch = !bitRead(pinState, 0); // "Obey"
@@ -96,9 +99,9 @@ void modeHandle() {
 			refreshRandom();                //refresh the melody if bools.preserveMelody isn't flagged
 		}
 		else {
-//			Decay = random(5, 10);
+			//			Decay = random(5, 10);
 		}
-		xMode = 0;   
+		xMode = 0;
 		bools.play = false;
 		bools.bend = false;
 		t = 0;

@@ -21,7 +21,7 @@ void musicbox() {
 			gener8Melody();
 			gener8BDbeat();
 			//gener8SDbeat();
-			gener8hatsStraight();
+			//gener8hatsStraight();
 			bools.MELODY = true;
 			bools.BASS = false;
 		}
@@ -41,9 +41,13 @@ void musicbox() {
 	else if (bools.rightSwitch) { //    If right button is in
 
 		xMode = 0;
-		octOffset = (x >> 7);
-		distAmount = 1;
-
+		if (mood < 3) {
+			octOffset = (x >> 7);
+		}
+		//distAmount = 1;
+		else{
+		Decay = (x >> 6);// 8;
+		}
 
 	}
 	else {                    //if no buttons are in
@@ -118,8 +122,7 @@ void myFirstSong() {
 
 
 	bools.play = true;
-	if (bools.leftSwitch) {
-		
+	if (bools.leftSwitch) {		
 		bools.eraseNote = true;
 	}
 	else if (bools.rightSwitch) {
@@ -173,7 +176,6 @@ void trigOnChangeSolo() {
 		xMode = 0;
 	}
 	bools.play = false;
-	//digitalWrite(LED, LOW);
 	xMode = 0;
 	diff = oldX - x;
 	if ((diff < -30) | (diff > 30)) {
@@ -230,14 +232,14 @@ void buttonSolos() {
 		t++;
 	}
 	else if (bools.leftSwitch) {
-		xMode = 1;
+		xMode = 0;
 		bools.bend = true;
 //		Decay = 7;
 		// playNoteNow(x, octaveselect, 2);
 	}
 	else {
 		refreshRandom();
-		xMode = random(0, 2);
+		//xMode = random(0, 2);
 		octaveselect = random(0, 4);
 	}
 }

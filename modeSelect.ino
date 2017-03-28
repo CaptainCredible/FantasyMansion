@@ -39,7 +39,7 @@ void modeSelect() {
 			portBplayer();
 			break;
 		case 8:
-			trigOnChangeSolo();
+			//trigOnChangeSolo();
 			break;
 
 		default:

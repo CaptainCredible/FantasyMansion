@@ -24,9 +24,12 @@ byte mask = B00000010;
 
 # define birthdate 31751 //birthdate
 
+//int highestx = 0;    //highest recorded X so far
+//int lowestx = 1024;  //lowest recorded X so far
+int correctedx = 0;  //x adjusted for current light
 
 
-byte mode = 1;
+byte mode = 1;  // 1 = myfirstsong, 2 = myfirstbeat
 #define numberOfModes 9
 #define LED 1    //digital pin 1
 #define LDR 1    //analog pin 1
@@ -48,12 +51,16 @@ unsigned int periodTimer = 10;
 byte pip = 0;
 //byte oct;
 int x = 0; //ldr value 0-600
+int purex = 0; //raw LDR value 0-1024
 byte diff = 0;
 byte xMode = 1;  // 0 = normal , 1 = insane pitch range, 2 = megapitchrange
 int oldX = 0;
 byte selex = 0;
 int t = 0;             //drum portB timer
 int s = 0;
+int modTempo = 8;
+int watchdogcounter = 0;
+
 
 byte portBselector = 4;
 //byte scalesOffset = 0;                                        //is this doing the same as root ?
@@ -142,7 +149,7 @@ struct bools {
   .oldRightSwitch = false,
   .play = false,
   .doubleButt = false,
-  .bend = true,
+  .bend = false,
   .disablePortB = false,
   .firstRun = true,
   .myFirstSongMode = false,
@@ -191,7 +198,7 @@ const uint16_t PROGMEM Scale[32] = {
   2724, 2886, 3058, 3240, 3432, 3636, 3850, 4080
 };
 
-byte bassTempo = 4;
+//byte bassTempo = 4;
 byte scaleSelect = 0; //0 = minor    1 = major    2 = penta 
 
 
@@ -268,7 +275,8 @@ unsigned long Chords[initBarLength] = {
 int dists = 0B0010010010010001;
 
 //byte octArray[16] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
-byte octArray = 0B0000000000000000;
+//byte octArray = 0B1010101010101010;
+int octArray = 0B0000000000000000;
 byte root = 12;
 
 
@@ -423,13 +431,9 @@ void setup() {
 	//delay(200);
 
 	randSeed = randSeed + (analogRead(LDR)) + birthdate;
-	//digitalWrite(portBpin, LOW);
 	randomSeed(randSeed);
-	//randomSeed(1000);
-	//refreshRandom();
-	//gener8BD();
-	//Enable 64 MHz PLL and use as source for Timer1
-	//PLLCSR = 1 << PCKE | 1 << PLLE;                                                       //can remove
+
+	PLLCSR = 1 << PCKE | 1 << PLLE;                                                       //can remove
 	// Set up Timer/Counter1 for PWM output
 	TIMSK = 0;                     // Timer interrupts OFF
 	TCCR1 = 1 << CS10;             // 1:1 prescale
@@ -446,9 +450,9 @@ void setup() {
 	OSCCAL += 2;
 
 	// Set up Watchdog timer for 4 Hz interrupt for note output.
-	WDTCR = 1 << WDIE | Tempo << WDP0; // 4 Hz interrupt
+	WDTCR = 1 << WDIE | 0 << WDP0; // 4 Hz interrupt
 	//setup_watchdog
-
+	sei();
 
 
 	//generate beats and melodie  gener8BDbeat();
@@ -457,6 +461,8 @@ void setup() {
 	//gener8Melody();
 	//melodyTEST();
 	refreshRandom();
+
+
 }
 
 

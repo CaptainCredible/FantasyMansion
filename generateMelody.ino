@@ -1,15 +1,6 @@
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
-/*void melodyTEST() {
-  for (int i = 0; i < barLength; i++) {        //step through steps
-	//Chords[i] = 0;                      //erase steps
-	if (true) {
-	  //writeANote(i,i%barLength );              //by ofsetting by eight we are making a buffer of eight on either side of the melody for transposition
-	  //writeANote(i,currentScale[(i*-1)+10] + 8);              //by ofsetting by eight we are making a buffer of eight on either side of the melody for transposition
-	}
-  }
-}
-*/
+
 
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -22,10 +13,12 @@ void clearMelody() {
 
 
 ///////////////////////////////////////////////////////////////////////////////////////
+/*
 void writeANote(byte STEP, byte note) {
 	note = 32 - note; //(note * -1) + 32;          //invert note
 	bitSet(Chords[STEP], note);        //write note starting with lowest note
 }
+*/
 
 
 
@@ -53,10 +46,9 @@ void deleteNote(byte steppo) {
 
 /////////////////////////////////////////////////////////////////////////////////////// Throws a bunch of random octaves into the mix
 void generateOctaves() {
-	for (int i = 0; i < random(16); i++) {
-		//    octArray[i] = random(0, 2);
-		bitSet(octArray, random(16));
-	}
+	//octArray = BDseq << 1;
+	octArray = 0B00000000000000000000000000000000;
+
 }
 
 
@@ -71,7 +63,11 @@ void dingDong() {
 void generateChords() {
 	byte tripChords = random(0, 8);
 	tripChords = 3;
-	byte chordBeatOffset = random(0, 8);
+	byte chordBeatOffset = 0;
+
+	if (random(2)) {
+		chordBeatOffset = random(0, 8);
+	}
 	for (int i = 0; i < barLength; i++) { //step through chords
 		if ((i + chordBeatOffset) % tripChords == 0) {                 //on step 3-7-11 and so on tripchords chordBeatOffset
 			for (byte chordStep = 0; chordStep < 3; chordStep++) {

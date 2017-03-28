@@ -13,8 +13,9 @@ void xManip(int select) {
 		break;
 
 	case 1: //insanepitchrange
-	  //x = x * 5;
-		x = (15 ^ x) - 50000;
+		x = x << 2;
+			//x = x * 5;
+		//x = (15 ^ x) - 50000;
 		break;
 
 	case 2: //megapitchrange

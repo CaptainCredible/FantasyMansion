@@ -3,7 +3,14 @@
 // Watchdog interrupt plays notes
 
 ISR(WDT_vect) {  //interupt triggered by watchdog INTERUPT SHOULD BE DISABLED IF WE ARE IN SLAVE MODE!
-	if (!bools.receiveSync) {
+	watchdogcounter += 2;
+	watchdogcounter + -bools.slowMo;
+
+	if (!bools.receiveSync && (watchdogcounter > modTempo)) {
+		watchdogcounter = 0;
+		if (bools.swing) {
+			bools.slowMo = !((selex + 1) % 2);                //on odd hits, watchdogcounter will count up one at a time
+		}
 		notePlayer(); //note player also plats beats
 	}
 }
@@ -11,7 +18,6 @@ ISR(WDT_vect) {  //interupt triggered by watchdog INTERUPT SHOULD BE DISABLED IF
 void notePlayer() {
 	if (bools.sendSync) {
 		bools.syncTick = true;
-		//digitalWrite(syncPin, HIGH);
 	}
 
 	if (bools.play) {                                                      //if we "flag play"
@@ -19,35 +25,30 @@ void notePlayer() {
 		t = 1;
 		s = 4;
 	}
-
+	
 }
-
+//int correctedxTEST = 0;
 void playNextNote() {
-
+	//byte beatSeqSelexLookahead = selex;
 	////////////////////////WRITING NOTES AND DRUMS///////////////////////////////
 	if (bools.writeNote) {
-		int EXX = 600 - x;                    //EXX is remapped x
-		//int EXX = x;
-		//EXX = EXX >> 3;
-		
-		/*
-		if (EXX < 0) {
-			EXX = 0;
-			
-		}
-		else if (EXX > 31) {
-			EXX = 31;
-		}
-		*/
-
-		int EXXOCT = EXX / 5;
-
-		//int pop = selex;
-		if (bools.TMelOrFBass) {
-			bitSet(Chords[(selex) % barLength], (Scale[(EXX%5)+scaleSelect]+(12*EXXOCT))%32);  //the note will be played immediately afterwards
+		//correctedxTEST+=32;
+		//correctedx = correctedxTEST % 1408;
+		if (correctedx >  1023) {   //if we are above 1024
+			bitSet(octArray, selex % 16);
+			correctedx = correctedx - 384; //rescale it to 0 - 1024
 		}
 		else {
-			bitSet(ChordsB[(selex) % barLength], EXX%16);  //the note will be played immediately afterwards
+			bitClear(octArray, selex % 16);
+	}	
+		if (bools.TMelOrFBass) { //the note will be played immediately afterwards
+
+			bitSet(Chords[selex], correctedx>>5);
+			//bitSet(Chords[(selex) % barLength], (Scale[(EXX%5)+scaleSelect]+(12*EXXOCT))%32);  //the note will be played immediately afterwards
+		}
+		else {
+			//bitSet(ChordsB[(selex) % barLength], EXX%16);  //the note will be played immediately afterwards
+			bitSet(ChordsB[selex], correctedx >> 6);
 		}
 		bools.writeNote = false;
 	}
@@ -60,37 +61,33 @@ void playNextNote() {
 			bools.eraseNote = false;
 		}
 	}
-
 	if (bools.beatWrite) {
-		byte beatSeqSelexLookahead = (beatSeqSelex - 1) % 16; //make a lookahead number
-
+		//byte beatSeqSelexLookahead = (beatSeqSelex - 1) % 16; //make a lookahead number
+		
 		if (x < 300) {                                         //BD because it is pullup this is actually darkness
-			bitSet(BDseq, beatSeqSelexLookahead);                //set next step to BD
+			bitSet(BDseq, (selex+1)%16);                //set next step to BD
 		}
 		else if (x < 400) { //SD
-			bitSet(HHseq, beatSeqSelexLookahead);                //set next step to HH
+			bitSet(HHseq, (selex + 1) % 16);                //set next step to HH
 		}
 		else {
-			bitSet(SDseq, beatSeqSelexLookahead);                //set next step to SD
+			bitSet(SDseq, (selex + 1) % 16);                //set next step to SD
 		}
 	}
 
 	if (bools.beatErase) {
-		byte beatSeqSelexLookahead = (beatSeqSelex - 1) % 16; //if beat erase is activated
-		bitClear(BDseq, beatSeqSelexLookahead);               //erase BD
-		bitClear(SDseq, beatSeqSelexLookahead);               //erase SD
-		bitClear(HHseq, beatSeqSelexLookahead);               //erase HH
+		//byte beatSeqSelexLookahead = (beatSeqSelex - 1) % 16; //if beat erase is activated
+		bitClear(BDseq, selex);               //erase BD
+		bitClear(SDseq, selex);               //erase SD
+		bitClear(HHseq, selex);               //erase HH
 	}
 
 
 	//////////////////////////////////////////////////////////////////////////////////////////////
-	if (bools.swing) {
-		bools.slowMo = !((selex+1) % 2);
-	}
-	Tempo = baseTempo + bools.slowMo;                                    //used for swing
-	WDTCR = 1 << WDIE | Tempo << WDP0; // 4 Hz interrupt
+
+	//WDTCR = 1 << WDIE | Tempo << WDP0; // 4 Hz interrupt
 	sei();                                                          // Allow interrupts
-	WDTCR |= 1 << WDIE;                                             //no idea what this is, is this the
+	//WDTCR |= 1 << WDIE;                                             //no idea what this is, is this the
 
 
 	///////CHORDSPLAY///////
@@ -100,8 +97,8 @@ void playNextNote() {
 
 			if (bools.MELODY) {
 				if (bitRead(Chords[(selex)], Note)) {
-					int freqSelector = 32 - (Note - ((modulationinterval * (barTicker % modulationSteps))*bools.allowTranspose));
-					if (freqSelector > 32)
+					int freqSelector = 31 - (Note - ((modulationinterval * (barTicker % modulationSteps))*bools.allowTranspose));
+					if (freqSelector > 31)
 					{
 						freqSelector = freqSelector - 12;
 					}
@@ -121,7 +118,7 @@ void playNextNote() {
 			if (bools.BASS) {
 				if (bitRead(ChordsB[(selex)], Note)) {
 
-					int bassFreqSelector = 32 - (Note - ((modulationinterval * (barTicker % modulationSteps))*bools.allowTranspose));    // offset by 6 or 18
+					int bassFreqSelector = 31 - (Note - ((modulationinterval * (barTicker % modulationSteps))*bools.allowTranspose));    // offset by 6 or 18
 					if (bassFreqSelector < 0) {
 						bassFreqSelector += 12;
 					}
@@ -152,9 +149,12 @@ void playNextNote() {
 
 	 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	selex++;                                                     // add one to the selector for chords (step ahead in the index)
+	selex++;                                                    // add one to the selector for chords (step ahead in the index)
+//	beatSeqSelex = (32 - selex) % 16;  //invert selex to read binary number from left to right
 	if (selex > barLength - 1) {                                 //if we reached the end
 		barTicker++;                                                  //add one to the bar counter
+
+		
 		if (barTicker > 1) {
 			if (bools.allowSDSeqMod) {
 				gener8SDbeat();

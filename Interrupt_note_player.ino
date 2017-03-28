@@ -77,9 +77,9 @@ void playNextNote() {
 
 	if (bools.beatErase) {
 		//byte beatSeqSelexLookahead = (beatSeqSelex - 1) % 16; //if beat erase is activated
-		bitClear(BDseq, selex);               //erase BD
-		bitClear(SDseq, selex);               //erase SD
-		bitClear(HHseq, selex);               //erase HH
+		bitClear(BDseq, (selex + 1) % 16);               //erase BD
+		bitClear(SDseq, (selex + 1) % 16);               //erase SD
+		bitClear(HHseq, (selex + 1) % 16);               //erase HH
 	}
 
 

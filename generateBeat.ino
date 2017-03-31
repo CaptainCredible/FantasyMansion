@@ -5,14 +5,14 @@ void clearDrums() {
 }
 
 void gener8BDbeat() {
-	//if(random(2)){
-	if (true) {
-		//BDseq = 0B1000100010001000;
-		BDseq = 0B0001000100010001;
+	if(random(2)){
+	//if (true) {
+		BDseq = 0B0010001000100010;
+		//BDseq = 0B0001000100010001;
 	}
 	else {
 		//BDseq = 0B1001001001001010;
-		BDseq = 0B0101001001001001;
+		BDseq = 0B1010010010010010;
 	}
 }
 

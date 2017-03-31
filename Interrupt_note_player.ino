@@ -4,7 +4,7 @@
 
 ISR(WDT_vect) {  //interupt triggered by watchdog INTERUPT SHOULD BE DISABLED IF WE ARE IN SLAVE MODE!
 	watchdogcounter += 2;
-	watchdogcounter + -bools.slowMo;
+	watchdogcounter -= bools.slowMo;
 
 	if (!bools.receiveSync && (watchdogcounter > modTempo)) {
 		watchdogcounter = 0;
@@ -151,24 +151,22 @@ void playNextNote() {
 
 	selex++;                                                    // add one to the selector for chords (step ahead in the index)
 //	beatSeqSelex = (32 - selex) % 16;  //invert selex to read binary number from left to right
-	if (selex > barLength - 1) {                                 //if we reached the end
-		barTicker++;                                                  //add one to the bar counter
 
-		
-		if (barTicker > 1) {
-			if (bools.allowSDSeqMod) {
-				gener8SDbeat();
-			}
-			if (bools.allowHHSeqMod) {
-			//	gener8hats();
-			}
-		}
+
+	if (selex > barLength-1) {                                 //if we reached the end anbd we arent busy doing anything important
+		barTicker++;                                                  //add one to the bar counter
 		if ((barTicker % 2 == 0) && (random(2) == 1)) {                 //on even ticks there is a 50% chance of adding a note
 			addNote();
 		}
+		else if (bools.allowSDSeqMod) {			  
+				gener8SDbeat();			
+		}
+
 		t = 0;
 		selex = 0;                                                    //reset the selector
 	}
+
+
 
 	if (barTicker > 3) {                                            //every 4 bars
 		barTicker = 0;                                                //reset bar counter
@@ -176,7 +174,7 @@ void playNextNote() {
 			addNote();                                                    //add a "random" note
 			deleteNote(random(barLength));                                                 //remove a random note (or not if there is no note on the step we chose
 		}
-		partTicker++;                                                 //increment the part ticker
+	//	partTicker++;                                                 //increment the part ticker
 		//bools.BASS = true;//( !bools.BASS;										//toggle BAss on and off
 
 
@@ -185,15 +183,17 @@ void playNextNote() {
 			gener8BDbeat();
 		}
 	}
+	/*
 	if (partTicker > 2) {
 		partTicker = 0;
 		songTicker++;
-		if (songTicker > 4 && !(bools.myFirstSongMode || bools.ownBeat)) {
+	
+	if (songTicker > 4 && !(bools.myFirstSongMode || bools.ownBeat)) {
 			refreshRandom();															//this remakes beats regardless of ownBeat further down so put the if bools ownbeat code in refreshrandom instead
 			songTicker = 0;
 		}
 	}
+	*/
 	t = 0;                                                         //set portBt back to 0 so portBs are audible
-
 }
 

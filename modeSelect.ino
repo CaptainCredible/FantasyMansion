@@ -28,10 +28,12 @@ void modeSelect() {
 
 		case 4:
 			myFirstBeat();
+			//HHseq = 0B0001000100010001;
+			
 			break;
 
 		case 6:
-			musicbox();
+			//musicbox();
 			trigOnPurifySolo();
 			break;
 

@@ -114,6 +114,17 @@ void clearBassLine() {
 	}
 }
 
+void generateDists() {
+	for (byte i = 0; i < 16; i++) {
+		if (random(2)) {
+			bitSet(dists, i);
+		}
+	
+		else {
+			bitClear(dists, i);
+		}
+	}
+}
 
 /*
 void generateDecayArray() {

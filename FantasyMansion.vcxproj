@@ -133,7 +133,7 @@
   </ImportGroup>
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties vm.upload.useprogrammer="1" vm.programmer_name="usbasp" />
+      <UserProperties vm.upload.useprogrammer="1" vm.programmer_name="usbasp" arduino.upload.port="COM6" custom_ATTinyCore_attinyx5_clock="8internal" />
     </VisualStudio>
   </ProjectExtensions>
 </Project>

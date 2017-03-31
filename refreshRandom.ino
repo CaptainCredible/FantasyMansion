@@ -9,8 +9,9 @@ void refreshRandom() {
 	portBlength = random(50, 500);
 
 	root = random(0, 12);
-	modTempo =random(4,10)<<1;
-	baseTempo = 0;
+	 modTempo =random(4,10)<<1;    // what does this do ?
+	//baseTempo = 4;
+	
 	//baseTempo = random(3,5);
 	portBselector = random(0, 4);       
 	scaleSelect = random(0, 3);

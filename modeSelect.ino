@@ -1,8 +1,10 @@
+#define numberOfModes 9
+
 void modeSelect() {
 	if (bools.limbo) {
 		bools.disablePortB = true;
 		bools.play = true;
-		playPortBsamp(t, 0);
+		playPortBsamp(t, 1);
 	}
 	else {
 
@@ -34,7 +36,8 @@ void modeSelect() {
 
 		case 6:
 			//musicbox();
-			trigOnPurifySolo();
+			buttonSolos();
+//			trigOnPurifySolo();
 			break;
 
 		case 7:

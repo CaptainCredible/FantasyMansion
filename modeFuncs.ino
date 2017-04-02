@@ -5,8 +5,8 @@ void musicbox() {
 		bools.disablePortB = false;
 		bools.play = true;
 		bools.firstRun = false;
-		clearDrums();
-		bools.ownBeat = false;
+		
+		//bools.ownBeat = false;
 		bools.allowHHSeqMod = true;
 		bools.allowSDSeqMod = true;
 		bools.allowTranspose = true;
@@ -14,6 +14,7 @@ void musicbox() {
 		bools.allowNoteAddition = true;
 		// bools.ownBeat = true;
 		if (!bools.preserveMelody) {
+			clearDrums();
 			clearMelody();
 			clearBassLine();
 			generateChords();
@@ -112,9 +113,10 @@ void myFirstSong() {
 		bools.allowNoteAddition = true;
 		bools.MELODY = true;
 		bools.BASS = true;
-
+		if (!bools.ownBeat){
 		clearDrums();
 		gener8BDbeat();
+		}
 		bools.firstRun = false;
 		for (int i = 0; i < 16; i++) {
 			//		amps[i] = 4;
@@ -147,14 +149,12 @@ void myFirstBeat() {
 		bools.allowBDSeqMod = false;
 		bools.allowHHSeqMod = false;
 		bools.allowSDSeqMod = false;
-		bools.ownBeat = true;
 		bools.play = true;
 		bools.disablePortB = false;
 		bools.firstRun = false;
 		BDseq = 0;
 		SDseq = 0;
-		gener8hats(); //hats to use as a metronome
-
+		//gener8hats(); //hats to use as a metronome
 		//HHseq = 0;
 	}
 	if (bools.rightSwitch) {

@@ -3,15 +3,17 @@
 // Watchdog interrupt plays notes
 
 ISR(WDT_vect) {  //interupt triggered by watchdog INTERUPT SHOULD BE DISABLED IF WE ARE IN SLAVE MODE!
-	watchdogcounter += 2;
-	watchdogcounter -= bools.slowMo;
+	watchdogcounter += 2;                           //on every iteration of watchdog add 2 to watchdogcounter
+	//watchdogcounter -= bools.slowMo ;				//if slowmo (halftime) ius on, remove one from counter
+	watchdogcounter -= (selex % 2) * bools.swing;
 
-	if (!bools.receiveSync && (watchdogcounter > modTempo)) {
-		watchdogcounter = 0;
-		if (bools.swing) {
-			bools.slowMo = !((selex + 1) % 2);                //on odd hits, watchdogcounter will count up one at a time
-		}
-		notePlayer(); //note player also plats beats
+	if (!bools.receiveSync && (watchdogcounter >= modTempo)) {         //when counter reaches tempo limit
+		watchdogcounter = 0;											//reset the counter
+	//	if (bools.swing) {												//are we using swing ?
+	//		bools.slowMo = !bools.slowMo;                //on odd hits, watchdogcounter will count up one at a time
+																		//bools.slowMo = !((selex + 1) % 2);                //on odd hits, watchdogcounter will count up one at a time
+	//	}
+		notePlayer(); //note player also plays beats
 	}
 }
 

@@ -2,6 +2,7 @@
 //TUNE MODE OSCCAL?
 // ARBITRARY BARLENGTHS?
 //some times hiccups
+# define birthdate 31751 //birthdate
 
 #include <avr/pgmspace.h>
 #include <avr/wdt.h>
@@ -15,27 +16,11 @@ just R send sync on tones
 // funcs i'd like to add:
 // OSCCAL+=1 OSCCAL+-1 mode
 //steam
-
-
 byte syncPin = 0; //0=normal 1=tones&sync 4=beat&sync
 byte mask = B00000010;
-/*
-	TO DO
-	toggle AMP multiplier to turn dist on and off
-	make it play arpeggios
-	make it switch to neart ??? every 8 steps perhaps
-
-*/
-
-# define birthdate 31751 //birthdate
-
-//int highestx = 0;    //highest recorded X so far
-//int lowestx = 1024;  //lowest recorded X so far
 int correctedx = 0;  //x adjusted for current light
-
-
 byte mode = 1;  // 1 = myfirstsong, 2 = myfirstbeat
-#define numberOfModes 9
+
 #define LED 1    //digital pin 1
 #define LDR 1    //analog pin 1
 #define LDRpin 2 //digital pin 2 
@@ -44,20 +29,19 @@ byte mode = 1;  // 1 = myfirstsong, 2 = myfirstbeat
 #define tonepin 4
 #define portBpin 1
 
-byte modulationSteps = 4;
-int portBlength = 500;
-byte playMode = 0; //BOTH, BASS, MELODY
+byte modulationSteps = 4;  //set in refreshrandom
+int portBlength = 500;		//set in refreshrandom
+byte playMode = 0;        //BOTH, BASS, MELODY
 byte octaveselect = 0;
 
-unsigned long oldSyncPulseTime = 0;
+//unsigned long oldSyncPulseTime = 0;
 unsigned long syncPeriod = 1;
 unsigned int periodTimer = 10;
 
 byte pip = 0;
-//byte oct;
 int x = 0; //ldr value 0-600
 int purex = 0; //raw LDR value 0-1024
-byte diff = 0;
+byte diff = 0; 
 byte xMode = 1;  // 0 = normal , 1 = insane pitch range, 2 = megapitchrange
 int oldX = 0;
 byte selex = 0;
@@ -455,7 +439,7 @@ void setup() {
 
 	randSeed = randSeed + (analogRead(LDR)) + birthdate;
 	randomSeed(randSeed);
-
+	
 	PLLCSR = 1 << PCKE | 1 << PLLE;                                                       //can remove
 	// Set up Timer/Counter1 for PWM output
 	TIMSK = 0;                     // Timer interrupts OFF

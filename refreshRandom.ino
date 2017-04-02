@@ -6,7 +6,7 @@ void refreshRandom() {
 	b = random(1, 20);
 	c = random(5, 31);
 	mood = random(5);
-	portBlength = random(50, 500);
+	portBlength = random(50, 300);
 
 	root = random(0, 12);
 	 modTempo =random(4,10)<<1;    // what does this do ?

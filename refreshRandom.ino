@@ -9,7 +9,7 @@ void refreshRandom() {
 	portBlength = random(50, 300);
 
 	root = random(0, 12);
-	 modTempo =random(4,10)<<1;    // what does this do ?
+	modTempo = random(4,12)<<1;    // what does this do ?
 	//baseTempo = 4;
 	
 	//baseTempo = random(3,5);

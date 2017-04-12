@@ -2,7 +2,7 @@
 //TUNE MODE OSCCAL?
 // ARBITRARY BARLENGTHS?
 //some times hiccups
-# define birthdate 31751 //birthdate
+# define birthdate 31754 //birthdate
 
 #include <avr/pgmspace.h>
 #include <avr/wdt.h>
@@ -11,7 +11,6 @@ L+R = wait for sync signal and choose
 just L send sync on drums
 just R send sync on tones
 */
-
 
 // funcs i'd like to add:
 // OSCCAL+=1 OSCCAL+-1 mode
@@ -209,7 +208,7 @@ const byte chordIntevals[9]{
 
 #define Channels 4
 //byte baseTempo = 3;
-byte Tempo = 4;      // 4 = 4 beats per second
+//byte Tempo = 4;      // 4 = 4 beats per second
 byte Decay = 10;    // Length of note decay; max 10
 
 unsigned int Acc[Channels];   //should be volatile ?

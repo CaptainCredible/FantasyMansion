@@ -114,15 +114,20 @@ void clearBassLine() {
 	}
 }
 
-void generateDists() {
-	for (byte i = 0; i < 16; i++) {
-		if (random(2)) {
-			bitSet(dists, i);
+void generateDists() {        //50 50 chance of generating any dists at all
+	if (random(2)) {
+		for (byte i = 0; i < 16; i++) {
+			if (random(2)) {
+				bitSet(dists, i);
+			}
+
+			else {
+				bitClear(dists, i);
+			}
 		}
-	
-		else {
-			bitClear(dists, i);
-		}
+	}
+	else {
+		dists = 0B0000000000000000;
 	}
 }
 

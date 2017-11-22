@@ -2,7 +2,7 @@
 //TUNE MODE OSCCAL?
 // ARBITRARY BARLENGTHS?
 //some times hiccups
-# define birthdate 31754 //birthdate
+# define birthdate 10023 //birthdate
 
 #include <avr/pgmspace.h>
 #include <avr/wdt.h>
@@ -354,6 +354,7 @@ void setup() {
 	if (!digitalRead(SW1) && !digitalRead(SW2)) { // if both buttons are pushed upon boot
 		pinMode(tonepin, INPUT);
 		pinMode(portBpin, INPUT);
+		bools.allowTranspose = true;
 		while (syncPin == 0) {                    //check witch one is released first to decide sync mode  //0=normal 1=tones&sync 4=beat&sync
 			if (digitalRead(portBpin)) {			  //if the portBpin recieves a pulse, set mode to sync in on portBpin
 				bools.portBMode = false;

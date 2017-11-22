@@ -111,7 +111,8 @@ void playNextNote() {
 					Freq[Chan] = (pgm_read_word_near(Scale + (freqSelector) % 32)) >> (oct);//Scale[freqSelector] >> oct;          //look up the notes frequency and shift the octave as per the array
 					//Decay = decayArray[selex % 16];
 					//Amp[Chan] = (amps[selex % 16]);                       // change to 2 for epic dist
-					Amp[Chan] = (1 << (Decay + 5 + bitRead(dists, selex)));
+					Amp[Chan] = (1 << (Decay + 5));
+					//Amp[Chan] = (1 << (Decay + 5 + bitRead(dists, selex))); using dists
 					//Amp[Chan] = (4 + (bitRead(dists, selex%16))) << (amps[selex%16] + 5);                       // change to 2 for epic dist
 					Chan = (Chan + 1) % (Channels);
 				}

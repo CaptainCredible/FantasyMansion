@@ -1,3 +1,13 @@
+/* Fantasy Mansion
+By Daniel Lacey-McDermott
+CC BY 4.0
+Licensed under a Creative Commons Attribution 4.0 International license: 
+http://creativecommons.org/licenses/by/4.0/
+
+Tone generation code based on Digital Music Box v2 by David Johnson-Davies - www.technoblogy.com - 16th March 2016
+*/
+
+
 //ONLY TEMPO CHANGE ON BOOT!
 //TUNE MODE OSCCAL?
 // ARBITRARY BARLENGTHS?
